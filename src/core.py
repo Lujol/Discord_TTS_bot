@@ -1,9 +1,9 @@
-from repository import *
-from tts_engine import TTSManager
-from src import settings
+from src.repository import *
+from src.tts_gen_engine import TTSManager
+from .config import settings
 
 
-setting_db : SettingRepository = JsonSettingRepository(
+setting_repository : SettingRepository = JsonSettingRepository(
     settings_path= settings.SETTINGS_PATH)
 
 channel_repository : ChannelRepository = JsonChannelRepository(

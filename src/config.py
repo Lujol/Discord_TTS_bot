@@ -8,6 +8,8 @@ class Config:
     
     TOKEN = os.getenv('DISCORD_TOKEN')
     
+    TEST_SERVER_Id = os.getenv('TEST_SERVER')
+    
     # 프로젝트 루트 경로. env 에는 해당 파일 명만 
     BASE_DIR = Path(__file__).resolve().parent.parent
     DATA_DIR = BASE_DIR / "data"

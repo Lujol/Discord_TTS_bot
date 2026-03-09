@@ -38,3 +38,6 @@ class InfoManager(commands.Cog):
                                                             녹음 시 적당히 끊어가면서 녹음해도 학습할때 여러개 선택 가능합니다!\n
                                                              알아서 필요한만큼 잘라가면서 녹음하면 됩니다!""", color=0x66dd66)
         await interaction.response.send_message(embed=embed)
+        
+async def setup(bot):
+    await bot.add_cog(InfoManager(bot))

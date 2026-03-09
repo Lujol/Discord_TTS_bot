@@ -1,5 +1,5 @@
 from abc import ABC, abstractmethod
-from dto import UserSettingsDTO, VoiceInfoDTO
+from src.dto import UserSettingsDTO, VoiceInfoDTO, PageRequest, PageResponse
 
 class ChannelRepository(ABC):
     
@@ -34,7 +34,7 @@ class SettingRepository(ABC):
 class VoiceRepository(ABC):
 
     @abstractmethod
-    async def get_custom_voice_list(self, server_id: int) -> dict[str,VoiceInfoDTO]:
+    async def get_custom_voice_list(self, server_id: int, page_req: PageRequest) -> PageResponse:
         """ 해당 서버에서 사용 가능한 custom 목소리 목록을 반환합니다"""
         pass
     
@@ -44,5 +44,5 @@ class VoiceRepository(ABC):
         pass
     
     @abstractmethod
-    async def get_google_voice(self) -> dict[str,VoiceInfoDTO]:
+    async def get_google_voice(self, page_req: PageRequest) -> PageResponse:
         """ 저장 되어있는 구글 목소리 목록을 반환합니다"""

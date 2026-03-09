@@ -1,14 +1,14 @@
 import discord
 from discord import app_commands
 from discord.ext import commands
-from repository import ChannelRepository
+from src.repository import ChannelRepository
 from src import toast
-from src import channel_db
+from src.core import channel_repository
 
 class TTSChannelManager(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
-        self.db :ChannelRepository = channel_db
+        self.db :ChannelRepository = channel_repository
             
     @app_commands.command(name="tts채널등록", description="해당 채널의 채팅은 TTS가 말해줍니다")
     async def addChannel(self, interaction: discord.Interaction):
@@ -59,3 +59,6 @@ class TTSChannelManager(commands.Cog):
         else:
             # 3.2 등록되어 있지 않으면
             await toast("TTS채널로 등록되어 있지 않습니다.", interaction)
+            
+async def setup(bot):
+    await bot.add_cog(TTSChannelManager(bot))

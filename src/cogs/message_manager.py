@@ -1,17 +1,19 @@
 import discord
+import io
+from typing import cast, Optional
 from discord import app_commands
 from discord.ext import commands
 import re
 from src.common import toast
-from src import channel_db,setting_db,tts_manager
+from src.core import channel_repository,setting_repository,tts_manager
 
-from dto import UserSettingsDTO
+from src.dto import UserSettingsDTO
 
 class MessageManager(commands.Cog):
     def __init__(self, bot):
         self.bot  = bot
-        self.channel_db = channel_db
-        self.setting_db = setting_db
+        self.channel_repository = channel_repository
+        self.setting_repository = setting_repository
         self.tts_manager = tts_manager
         
         self.url_pattern = r'https?://\S+|www\.\S+'
@@ -24,7 +26,7 @@ class MessageManager(commands.Cog):
             return
         
         # 2. 타겟 채널 확인 
-        target_channels : set[int] = await self.channel_db.get_all_tts_channels()
+        target_channels : set[int] = await self.channel_repository.get_all_tts_channels()
         if (message.channel.id not in target_channels):
             return
         
@@ -61,15 +63,33 @@ class MessageManager(commands.Cog):
         # 7.3 봇이 해당 채널에 존재 할 경우 > 유지
         
         # 8. tts 진행  
-        await self.play_tts(message.guild.id , message.author.id , message.content)
+        await self.play_tts(message)
 
 
-    async def play_tts(self, server_id :int, user_id :int , message_content :str) -> None:
+    async def play_tts(self, message: discord.Message) -> None:
+        if message.guild is None:
+            raise Exception("[Error] message.guild가 존재하지 않습니다.")
+    
+        server_id :int = message.guild.id
+        user_id :int = message.author.id
+        message_content :str = message.content
+        
+        if message.guild.voice_client is None:
+            raise Exception("[Warn] voice_client가 존재하지 않습니다.")
+        raw_vc = message.guild.voice_client
+        vc = cast(Optional[discord.VoiceClient], raw_vc)
         
         # 유저 설정 조회
-        user_settings :UserSettingsDTO = await self.setting_db.get_user_settings(server_id, user_id)
+        user_settings :UserSettingsDTO = await self.setting_repository.get_user_settings(server_id, user_id)
         
         # 오디오 생성 
-        audio_binary = self.tts_manager.generate_audio(user_settings , server_id, message_content)
-            
+        audio_binary = await self.tts_manager.generate_audio(user_settings , server_id, message_content)
+        audio_stream = io.BytesIO(audio_binary)
+        if vc and vc.is_connected():
+            try:
+                vc.play(discord.FFmpegPCMAudio(audio_stream, pipe=True))
+            except Exception as e:
+                raise Exception(f"[Error] 재생 중 오류 발생 ! {e}" )
 
+async def setup(bot):
+    await bot.add_cog(MessageManager(bot))

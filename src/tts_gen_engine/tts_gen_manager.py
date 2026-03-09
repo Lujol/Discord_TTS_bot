@@ -1,13 +1,14 @@
-from tts_engine import GoogleTTSClient
-from tts_engine import ElevenlabsTTSClient
-from tts_engine import BaseClient
+from src.tts_gen_engine import GoogleTTSClient, ElevenlabsTTSClient, BaseClient
 
-from dto import UserSettingsDTO, VoiceInfoDTO
-from src import voice_repository
+from src.dto import UserSettingsDTO, VoiceInfoDTO
+
 
 class TTSManager:
     
     def __init__(self, google_key_path : str, elevenlabs_key :str):
+        
+        from src.core import voice_repository
+        
         self.provider :dict[str, BaseClient] = {
             "google": GoogleTTSClient(key_path= google_key_path),
             "elevenlabs":  ElevenlabsTTSClient(key= elevenlabs_key )
@@ -31,7 +32,7 @@ class TTSManager:
             )
         
         elif provider_type == "elevenlabs":
-            voice_setting  = await voice_repository.find_custom_voice_info(server_id ,user_setting.voice)
+            voice_setting  = await self.voice_repository.find_custom_voice_info(server_id ,user_setting.voice)
 
         if voice_setting is None:
             provider_type = "google"
@@ -43,4 +44,4 @@ class TTSManager:
         # type에 따라 provider 선택 / 기본값 google
         client = self.provider.get(provider_type, self.provider["google"])
         
-        return client.generate_audio(voice_setting ,text)
+        return await client.generate_audio(voice_setting ,text)

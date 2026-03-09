@@ -2,7 +2,7 @@ from pydantic import BaseModel
 from typing import Optional
 
 class UserSettingsDTO(BaseModel):
-    language :Optional[str]
-    gender :Optional[str]
-    voice :Optional[str]
+    language :Optional[str] =None
+    gender :Optional[str] =None
+    voice :Optional[str] =None
     type :Optional[str] = "google"

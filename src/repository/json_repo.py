@@ -1,8 +1,9 @@
 import json
-import os
 import asyncio
+
 from .db_interface import ChannelRepository, SettingRepository, VoiceRepository
-from dto import UserSettingsDTO, VoiceInfoDTO
+from src.dto import UserSettingsDTO, VoiceInfoDTO, PageResponse,PageRequest
+from src import apply_filter_and_sort, paging
 
 class JsonChannelRepository(ChannelRepository):
     
@@ -145,15 +146,33 @@ class JsonVoiceRepository(VoiceRepository):
             print(f"[Warn] {self.custom_voices_path} 파일이 없거나 비어있습니다.")
             return {}
         
-    async def get_custom_voice_list(self, server_id: int) -> dict[str,VoiceInfoDTO]:
+    
+    async def get_custom_voice_list(self, server_id: int, page_req :PageRequest) -> PageResponse:
         server_id_str = str(server_id)
-
+        
+        # 데이터 가져오기 
         try:
-            voices = self.custom_voices[server_id_str]
-            voices_dto = {name: VoiceInfoDTO(**info) for name, info in voices.items()}
-            return voices_dto
+            voices :dict= self.custom_voices[server_id_str]
+            
         except KeyError:
-            return {}
+            # TODO: db에도 추가
+            self.custom_voices[server_id_str] = {}
+            voices :dict= self.custom_voices[server_id_str]
+            
+
+        voice_list :list[VoiceInfoDTO] = [VoiceInfoDTO(**info) for name, info in voices.items()]
+        
+        # 필터링 및 정렬
+        voice_list = apply_filter_and_sort(items=voice_list,
+                                            filters= page_req.filter,
+                                            sorts= page_req.sort)
+        
+        # 페이징 처리
+        response :PageResponse = paging(filtered_list= voice_list,
+                                        page_req= page_req)
+        
+        return response
+
 
     async def find_custom_voice_info(self, server_id :int, label: str |None) -> VoiceInfoDTO | None :
         
@@ -166,12 +185,30 @@ class JsonVoiceRepository(VoiceRepository):
         except (TypeError, ValueError, KeyError):
             return None
 
-    async def get_google_voice(self) -> dict[str,VoiceInfoDTO]:
+    async def get_google_voice(self, page_req: PageRequest) -> PageResponse:
+        
+        
         try:
-            voices_dto = {name: VoiceInfoDTO(**info) for name, info in self.google_voices.items()}
-            return voices_dto
-        
+            voice_list :list[VoiceInfoDTO]= [VoiceInfoDTO(**info) for name, info in self.google_voices.items()]
+
         except KeyError:
-            return {}
+            # 빈 리스트 반환
+            return PageResponse(
+                items= [],
+                page=1,
+                max_item=0,
+                max_page=1,
+                has_next=False
+            )
         
+        # 필터링 및 정렬
+        voice_list = apply_filter_and_sort(items=voice_list,
+                                            filters= page_req.filter,
+                                            sorts= page_req.sort)
+        
+        # 페이징 처리
+        response :PageResponse = paging(filtered_list= voice_list,
+                                        page_req= page_req)
+        
+        return response
         

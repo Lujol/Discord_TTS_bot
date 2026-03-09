@@ -1,7 +1,7 @@
 from elevenlabs.client import ElevenLabs
 from elevenlabs.play import play
-from dto import VoiceInfoDTO
-from tts_engine import BaseClient
+from src.dto import VoiceInfoDTO
+from src.tts_gen_engine import BaseClient
 import asyncio
 
 class ElevenlabsTTSClient(BaseClient):
