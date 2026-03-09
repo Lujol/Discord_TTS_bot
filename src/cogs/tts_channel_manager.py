@@ -8,7 +8,7 @@ from src import channel_db
 class TTSChannelManager(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
-        self.db :ChannelRepository = chnnel_db
+        self.db :ChannelRepository = channel_db
             
     @app_commands.command(name="tts채널등록", description="해당 채널의 채팅은 TTS가 말해줍니다")
     async def addChannel(self, interaction: discord.Interaction):

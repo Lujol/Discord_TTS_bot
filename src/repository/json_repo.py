@@ -121,11 +121,11 @@ class JsonSettingRepository(SettingRepository):
 
 class JsonVoiceRepository(VoiceRepository):
     
-    def __init__(self, google_voices_path :str, elevenlabs_voices_path :str):
+    def __init__(self, google_voices_path :str, custom_voices_path :str):
         self.google_voices_path = google_voices_path
         self.google_voices = self._initialize_google_voices()
-        self.elevenlabs_voices_path = elevenlabs_voices_path
-        self.elevenlabs_voices = self._initialize_elevenlabs_voices()
+        self.custom_voices_path = custom_voices_path
+        self.custom_voices = self._initialize_custom_voices()
         self.lock  = asyncio.Lock()
 
 
@@ -137,23 +137,34 @@ class JsonVoiceRepository(VoiceRepository):
             print(f"[Warn] {self.google_voices_path} 파일이 없거나 비어있습니다.")
             return {}
 
-    def _initialize_elevenlabs_voices(self) -> dict:
+    def _initialize_custom_voices(self) -> dict:
         try:
-            with open(self.elevenlabs_voices_path, 'r', encoding='utf-8') as f:
+            with open(self.custom_voices_path, 'r', encoding='utf-8') as f:
                 return json.load(f)
         except (FileNotFoundError, json.JSONDecodeError):
-            print(f"[Warn] {self.elevenlabs_voices_path} 파일이 없거나 비어있습니다.")
+            print(f"[Warn] {self.custom_voices_path} 파일이 없거나 비어있습니다.")
             return {}
         
-    async def get_elevenlabs_voice(self, server_id: int) -> dict[str,VoiceInfoDTO]:
+    async def get_custom_voice_list(self, server_id: int) -> dict[str,VoiceInfoDTO]:
         server_id_str = str(server_id)
 
         try:
-            voices = self.elevenlabs_voices[server_id_str]
+            voices = self.custom_voices[server_id_str]
             voices_dto = {name: VoiceInfoDTO(**info) for name, info in voices.items()}
             return voices_dto
         except KeyError:
             return {}
+
+    async def find_custom_voice_info(self, server_id :int, label: str |None) -> VoiceInfoDTO | None :
+        
+        server_id_str = str(server_id)
+        
+        try:
+            data = self.custom_voices[server_id_str][label]
+            return VoiceInfoDTO(**data)
+        
+        except (TypeError, ValueError, KeyError):
+            return None
 
     async def get_google_voice(self) -> dict[str,VoiceInfoDTO]:
         try:

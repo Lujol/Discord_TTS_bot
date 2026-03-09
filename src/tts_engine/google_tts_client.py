@@ -1,6 +1,6 @@
 from google.cloud import texttospeech
 from tts_engine import BaseClient
-from dto import UserSettingsDTO
+from dto import VoiceInfoDTO
 
 class GoogleTTSClient(BaseClient):
     
@@ -12,7 +12,7 @@ class GoogleTTSClient(BaseClient):
             print(f"[Error] Google TTS Client 생성 실패: {e}")
             raise e
         
-    async def generate_audio(self, user_setting :UserSettingsDTO, text :str) -> bytes:
+    async def generate_audio(self, voice_setting :VoiceInfoDTO, text :str) -> bytes:
         
         if not self.client:
             raise Exception("[Error] Google TTS Client가 초기화되지 않았습니다.")
@@ -24,27 +24,30 @@ class GoogleTTSClient(BaseClient):
         audio_config = texttospeech.AudioConfig(audio_encoding=texttospeech.AudioEncoding.MP3)
         
         
-
+        # 성별 설정
         ssml_gender = texttospeech.SsmlVoiceGender.NEUTRAL
         
-        if user_setting.gender == "남성":
+        if voice_setting.gender == "남성":
             ssml_gender = texttospeech.SsmlVoiceGender.MALE
             
-        elif user_setting.gender == "여성":
+        elif voice_setting.gender == "여성":
             ssml_gender = texttospeech.SsmlVoiceGender.FEMALE
-            
+        
+        # 언어 설정
+        language_code = voice_setting.language or "ko-KR"
+        
         # voice 설정 존재 없을 시 ?
-        if user_setting.voice is None:
+        if voice_setting.voice_id is None:
             voice_params = texttospeech.VoiceSelectionParams(
-                language_code=user_setting.language, 
+                language_code= language_code, 
                 ssml_gender=ssml_gender
             )
         # voice 설정 존재 시 
         else:
             voice_params = texttospeech.VoiceSelectionParams(
-                name=user_setting.voice,
+                name=voice_setting.voice_id,
                 ssml_gender=ssml_gender,
-                language_code=user_setting.language
+                language_code=language_code
             )
 
         # API 호출
@@ -62,4 +65,4 @@ class GoogleTTSClient(BaseClient):
         if audio_binary:
             return audio_binary
         else: 
-            raise Exception("[Warn] 오디오 데이터가 생성되지 않았습니다.")
+            raise Exception("[Warn] google 오디오 데이터가 생성되지 않았습니다.")

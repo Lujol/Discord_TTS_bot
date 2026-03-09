@@ -34,12 +34,14 @@ class SettingRepository(ABC):
 class VoiceRepository(ABC):
 
     @abstractmethod
-    async def get_elevenlabs_voice(self, server_id: int) -> dict[str,VoiceInfoDTO]:
-        """ 해당 서버에서 사용 가능한 elevenlabs 목소리 목록을 반환합니다"""
+    async def get_custom_voice_list(self, server_id: int) -> dict[str,VoiceInfoDTO]:
+        """ 해당 서버에서 사용 가능한 custom 목소리 목록을 반환합니다"""
         pass
     
-    #@abstractmethod
-    #async def get_elevenlabs_voice_info(self, )
+    @abstractmethod
+    async def find_custom_voice_info(self, server_id :int, label: str | None) -> VoiceInfoDTO | None :
+        """ 해당 label을 가진 목소리의 정보를 반환합니다"""
+        pass
     
     @abstractmethod
     async def get_google_voice(self) -> dict[str,VoiceInfoDTO]:
