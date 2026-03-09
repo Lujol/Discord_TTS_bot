@@ -1,0 +1,46 @@
+from abc import ABC, abstractmethod
+from dto import UserSettingsDTO, VoiceInfoDTO
+
+class ChannelRepository(ABC):
+    
+    @abstractmethod
+    async def get_all_tts_channels(self) -> set[int]:
+        """등록된 모든 TTS 채널 ID를 반환합니다."""
+        pass
+
+    @abstractmethod
+    async def add_tts_channel(self, channel_id: int) -> None:
+        """TTS 채널을 등록합니다."""
+        pass
+    
+    @abstractmethod
+    async def delete_tts_channels(self, channel_id: int) -> None:
+        """TTS 채널을 삭제합니다."""
+        pass
+
+
+class SettingRepository(ABC):
+    
+    @abstractmethod
+    async def get_user_settings(self, server_id :int ,user_id :int) -> UserSettingsDTO:
+        """ 해당 유저의 개인 설정을 반환 합니다."""
+        pass
+    
+    @abstractmethod
+    async def add_user_settings(self, server_id :int, user_id :int, data :UserSettingsDTO) -> None:
+        """ 해당 유저의 설정을 추가/변경 합니다."""
+        pass
+    
+class VoiceRepository(ABC):
+
+    @abstractmethod
+    async def get_elevenlabs_voice(self, server_id: int) -> dict[str,VoiceInfoDTO]:
+        """ 해당 서버에서 사용 가능한 elevenlabs 목소리 목록을 반환합니다"""
+        pass
+    
+    #@abstractmethod
+    #async def get_elevenlabs_voice_info(self, )
+    
+    @abstractmethod
+    async def get_google_voice(self) -> dict[str,VoiceInfoDTO]:
+        """ 저장 되어있는 구글 목소리 목록을 반환합니다"""
