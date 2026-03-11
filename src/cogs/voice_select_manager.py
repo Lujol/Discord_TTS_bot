@@ -27,9 +27,9 @@ class VoiceSelectManager(commands.Cog):
         else:
             return await voice_repository.get_google_voice(page_req= page)
     
-    async def save_data(self, server_id:int, user_id:int, voice_id:str, voice_type ) -> None:
+    async def save_data(self, server_id:int, user_id:int, update_setting :UserSettingsDTO  ) -> None:
 
-        await setting_repository.add_user_settings(server_id, user_id, UserSettingsDTO(voice= voice_id, type=voice_type))
+        await setting_repository.add_user_settings(server_id, user_id, update_setting)
     
 async def setup(bot):
     await bot.add_cog(VoiceSelectManager(bot))
