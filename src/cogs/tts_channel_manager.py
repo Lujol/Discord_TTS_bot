@@ -11,7 +11,7 @@ class TTSChannelManager(commands.Cog):
         self.db :ChannelRepository = channel_repository
             
     @app_commands.command(name="tts채널등록", description="해당 채널의 채팅은 TTS가 말해줍니다")
-    async def addChannel(self, interaction: discord.Interaction):
+    async def add_channel(self, interaction: discord.Interaction):
         
         # 0. 채널 존재 확인
         if interaction.channel is None:
@@ -35,7 +35,7 @@ class TTSChannelManager(commands.Cog):
             await toast("이미 TTS 채널로 등록되어 있는 채널입니다.", interaction)
 
     @app_commands.command(name="tts채널삭제", description="해당 채널을 TTS 리딩 범위에서 제거합니다")
-    async def deleteChanel(self, interaction: discord.Interaction):
+    async def delete_channel(self, interaction: discord.Interaction):
         
         # 0. 채널 존재 확인
         if interaction.channel is None:

@@ -1,8 +1,9 @@
 import discord
 from discord import app_commands
 from discord.ext import commands
+from src import toast
 
-class EventManager(commands.Cog):
+class ExitManager(commands.Cog):
 
     def __init__(self, bot):
         self.bot = bot
@@ -26,6 +27,18 @@ class EventManager(commands.Cog):
                 # 봇 퇴장
                 await member.guild.voice_client.disconnect(force=False)
 
+    @app_commands.command(name="퇴장", description="봇을 음성 채팅방에서 퇴장시킵니다")
+    async def exit(self, interaction: discord.Interaction):
+        if interaction.guild is None:
+            return 
+        
+        vc = interaction.guild.voice_client
+        
+        if vc is None:
+            return
+        
+        await vc.disconnect(force= False)
+        return await toast("연결 종료", interaction) 
     
 async def setup(bot):
-    await bot.add_cog(EventManager(bot))
+    await bot.add_cog(ExitManager(bot))
