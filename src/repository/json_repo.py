@@ -2,7 +2,8 @@ import json
 import asyncio
 
 from .db_interface import ChannelRepository, SettingRepository, VoiceRepository
-from src.dto import UserSettingsDTO, VoiceInfoDTO, PageResponse,PageRequest
+from src.model.dto import UserSettingsDTO, VoiceInfoDTO, PageResponse,PageRequest
+from src.model.vo import VoiceGender, VoiceLanguage, VoiceType
 from src import apply_filter_and_sort, paging
 
 class JsonChannelRepository(ChannelRepository):
@@ -92,10 +93,10 @@ class JsonSettingRepository(SettingRepository):
             return UserSettingsDTO(**data)
         # 2.1 기본 세팅이 없을 시 
         except KeyError:
-            default :UserSettingsDTO = UserSettingsDTO(language = 'ko-KR', 
-                                                        gender= '중성', 
-                                                        voice= 'NONE',
-                                                        type= 'google') 
+            default :UserSettingsDTO = UserSettingsDTO(language = VoiceLanguage.KO, 
+                                                        gender= VoiceGender.NEUTRAL, 
+                                                        voice= None,
+                                                        type= VoiceType.DEFAULT) 
             
             await self.add_user_settings(server_id, user_id, default )
             
@@ -108,7 +109,7 @@ class JsonSettingRepository(SettingRepository):
         user_id_str = str(user_id)
         
         # dto -> dict
-        data_dict = data.model_dump(exclude_unset=True)
+        data_dict = data.model_dump(exclude_none=True)
         
         # 2. 락 
         async with self.settings_lock:

@@ -7,7 +7,7 @@ import re
 from src.common import toast
 from src.core import channel_repository,setting_repository,tts_manager
 
-from src.dto import UserSettingsDTO
+from src.model.dto import UserSettingsDTO
 
 class MessageManager(commands.Cog):
     def __init__(self, bot):

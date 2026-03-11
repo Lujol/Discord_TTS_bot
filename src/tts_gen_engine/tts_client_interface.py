@@ -1,5 +1,5 @@
 from abc import ABC, abstractmethod
-from src.dto import UserSettingsDTO, VoiceInfoDTO
+from src.model.dto import UserSettingsDTO, VoiceInfoDTO
 
 class BaseClient(ABC):
     @abstractmethod

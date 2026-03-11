@@ -1,13 +1,10 @@
 import discord
 
 from typing import Any
-from enum import Enum
-from src.dto import PageRequest, PageResponse, VoiceInfoDTO
+from src.model.dto import PageRequest, PageResponse, VoiceInfoDTO
+from src.model.vo import VoiceType, VoiceProvider 
 
-class VoiceType(Enum):
-    CUSTOM = "커스텀 목소리"
-    DEFAULT = "기본 목소리"
-    DYNAMIC = "맞춤 목소리"
+
     
 class VoiceSettingView(discord.ui.View):
     def __init__(self, get_data, save_data):
@@ -20,12 +17,16 @@ class VoiceSettingView(discord.ui.View):
         self.save_data = save_data
         self.page_req : PageRequest = PageRequest(page=1, page_size=20)
         
+        self.voice_type :VoiceType
+        
     async def selected_type(self, voice_type: VoiceType, interaction: discord.Interaction):
         """ 사용자가 타입 선택 후 처리
         Args:
             type (VoiceType): _description_
         """
         self.clear_items()
+        
+        self.voice_type = voice_type
         
         if voice_type == VoiceType.DYNAMIC:
             # 지역, 성별 선택
@@ -43,8 +44,10 @@ class VoiceSettingView(discord.ui.View):
         await interaction.response.edit_message(view=self)
         
     async def selected_voice(self, voice_id:str, interaction: discord.Interaction):
-        await self.save_data(interaction.guild_id, interaction.user.id, voice_id)
-        print("성공")
+   
+        await self.save_data(interaction.guild_id, interaction.user.id, voice_id, self.voice_type)
+        
+        print("[Info] 설정 저장 성공")
         
 class VoiceSelect(discord.ui.Select):
     def __init__(self, voice_list :list[VoiceInfoDTO]):
@@ -69,6 +72,7 @@ class VoiceSelect(discord.ui.Select):
         
     async def callback(self, interaction: discord.Interaction) -> Any:
         user_id = interaction.user.id
+        # voice_id
         selected_voice = self.values[0]
         print(selected_voice)
 
@@ -76,7 +80,7 @@ class VoiceSelect(discord.ui.Select):
         assert isinstance(self.view, VoiceSettingView)
         view :VoiceSettingView = self.view
 
-        await view.selected_voice(selected_voice, interaction)
+        await view.selected_voice(selected_voice ,interaction)
 
 class TypeSelectButton(discord.ui.Button):
     def __init__(self, voice_type :VoiceType):
