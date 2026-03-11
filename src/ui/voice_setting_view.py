@@ -4,9 +4,11 @@ from typing import Any
 from src.model.dto import PageRequest, PageResponse, VoiceInfoDTO ,UserSettingsDTO
 from src.model.vo import VoiceType,  VoiceGender, VoiceLanguage
 from src.ui.enum_select import EnumSelect
+from src.ui.page_view_interface import PaginationView
+from src.ui.page_button import NextPageButton, PrevPageButton, PageInfo
 
     
-class VoiceSettingView(discord.ui.View):
+class VoiceSettingView(PaginationView):
     def __init__(self, get_data, save_data):
         super().__init__(timeout=None)
         # 타입 선택하는 버튼 생성
@@ -15,9 +17,8 @@ class VoiceSettingView(discord.ui.View):
         
         self.get_data = get_data
         self.save_data = save_data
-        self.page_req : PageRequest = PageRequest(page=1, page_size=20)
         
-        self.voice_type :VoiceType
+        self.voice_type :VoiceType = VoiceType.DEFAULT
         
     async def selected_type(self, voice_type: VoiceType, interaction: discord.Interaction):
         """ 사용자가 타입 선택 후 처리
@@ -42,13 +43,8 @@ class VoiceSettingView(discord.ui.View):
             ))
             
         else:
-            # 목소리 선택 (커스텀 or 기본)
-            
-            # 목소리 목록 가져오기
-            voice_list :PageResponse = await self.get_data(voice_type, interaction.guild_id, self.page_req)
-            
-            # select 생성
-            self.add_item(VoiceSelect(voice_list.items))
+            # page 생성
+            await self.build_page(interaction=interaction)
         
         await interaction.response.edit_message(view=self)
         
@@ -66,8 +62,18 @@ class VoiceSettingView(discord.ui.View):
         
         await self.save_data(interaction.guild_id, interaction.user.id, UserSettingsDTO(gender=selected_gender[0], type= self.voice_type ))
         
+    # 상위 메서드 구현 
+    async def build_page(self , interaction :discord.Interaction):
+        # 목소리 목록 가져오기
+        self.page_res = await self.get_data(self.voice_type, interaction.guild_id, self.page_req)
+            
+        # select 생성
+        self.add_item(VoiceSelect(self.page_res.items))
         
-        
+        # button 생성 
+        self.add_item(PrevPageButton())
+        self.add_item(PageInfo(self.page_res))
+        self.add_item(NextPageButton())
         
 class VoiceSelect(discord.ui.Select):
     def __init__(self, voice_list :list[VoiceInfoDTO]):
@@ -105,7 +111,7 @@ class VoiceSelect(discord.ui.Select):
 
 class TypeSelectButton(discord.ui.Button):
     def __init__(self, voice_type :VoiceType):
-        super().__init__(style=discord.ButtonStyle.primary, label = voice_type.value)
+        super().__init__(style=discord.ButtonStyle.primary, label = voice_type.display_name)
         self.voice_type :VoiceType = voice_type
         
     async def callback(self, interaction: discord.Interaction):
