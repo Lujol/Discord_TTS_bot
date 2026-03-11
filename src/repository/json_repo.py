@@ -178,7 +178,6 @@ class JsonVoiceRepository(VoiceRepository):
     async def find_custom_voice_info(self, server_id :int, label: str |None) -> VoiceInfoDTO | None :
         
         server_id_str = str(server_id)
-        
         try:
             data = self.custom_voices[server_id_str][label]
             return VoiceInfoDTO(**data)

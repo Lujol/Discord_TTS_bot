@@ -23,18 +23,24 @@ class TTSManager:
         voice_type :str = user_setting.type or VoiceType.DEFAULT
         provider_type: VoiceProvider = VoiceProvider.GOOGLE
         voice_setting : VoiceInfoDTO |None = None
-
         
-        if voice_type == VoiceType.CUSTOM:
-            provider_type= VoiceProvider.ELEVENLABS 
-            voice_setting  = await self.voice_repository.find_custom_voice_info(server_id ,user_setting.voice)
-
-        if voice_type in (VoiceType.DEFAULT, VoiceType.DYNAMIC , None) or voice_setting is None:
+        if voice_type == VoiceType.DEFAULT:
             provider_type= VoiceProvider.GOOGLE
             voice_setting = VoiceInfoDTO(
                 gender= user_setting.gender,
                 language= user_setting.language,
                 voice_id= user_setting.voice,
+            )
+        
+        if voice_type == VoiceType.CUSTOM:
+            provider_type= VoiceProvider.ELEVENLABS 
+            voice_setting  = await self.voice_repository.find_custom_voice_info(server_id ,user_setting.voice)
+
+        if voice_type in (VoiceType.DYNAMIC , None) or voice_setting is None:
+            provider_type= VoiceProvider.GOOGLE
+            voice_setting = VoiceInfoDTO(
+                gender= user_setting.gender,
+                language= user_setting.language
             )
         
         # type에 따라 provider 선택 / 기본값 google

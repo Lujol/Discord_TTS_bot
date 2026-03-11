@@ -2,7 +2,7 @@ import discord
 import asyncio
 import math
 from typing import TypeVar, Optional, Any
-from src.dto import PageRequest, PageResponse
+from src.model.dto import PageRequest, PageResponse
 
 async def toast(messege: str,interaction: discord.Interaction):
     

@@ -15,9 +15,9 @@ class VoiceInfoDTO(BaseModel):
     def to_select_option(self) -> SelectOption:
         
         assert isinstance(self.label, str)
-        assert isinstance(self.voice_id, str)
+        assert isinstance(self.label, str)
         
         return SelectOption(
             label= self.label,
-            value= self.voice_id
+            value= self.label
         )
