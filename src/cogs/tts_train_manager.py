@@ -8,7 +8,7 @@ from src.core import elevenlabs_ivc_manager, recording_repository, voice_reposit
 from src.ui import TrainPagedView
 from src.model.dto import PageRequest, PageResponse, SaveCustomVoiceDTO
 from src.model.vo import VoiceProvider
-from src import settings
+from src import settings, toast
 
 class TTSTrainManager(commands.Cog):
     def __init__(self, bot):
@@ -21,9 +21,16 @@ class TTSTrainManager(commands.Cog):
     @app_commands.describe(tts_name = '저장 할 tts의 이름')
     async def tts_fast_train(self, interaction: discord.Interaction, tts_name:str):
         
-        # TODO tts_name 중복 확인 
+        if interaction.guild is None:
+            return 
         
-        recording_list = await self.get_data(interaction.user.id, PageRequest(page=1, page_size= 10))
+        # tts_name 중복 확인 
+        voice = await voice_repository.find_custom_voice_info(server_id=interaction.guild.id,label=tts_name)
+        if voice:
+            await toast(f"이미 존재하는 이름입니다! : {tts_name}", interaction)
+            return 
+        
+        recording_list = await self.get_data(interaction.user.id, PageRequest(page=1, page_size= 20))
    
         view = TrainPagedView(
             recording_list=recording_list,
