@@ -4,6 +4,7 @@ from discord import SelectOption
 class UserRecordingDTO(BaseModel):
     file_name:str
     label:str
+    duration:float
     time_stamp : int
     
 

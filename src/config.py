@@ -21,6 +21,10 @@ class Config:
     # ELEVENLABS는 api키 바로 사용
     ELEVENLABS_API_KEY = os.getenv("ELEVENLABS_API_KEY", 'NONE')
     
+    # 기본으로 사용 할 모델 
+    DEFAULT_ELEVENLABS_MODEL = os.getenv("DEFAULT_ELEVENLABS_MODEL", 'eleven_flash_v2_5')
+    
+    
     settings = os.getenv('SETTINGS', 'settings.json')
     SETTINGS_PATH = str(DATA_DIR / settings)
     

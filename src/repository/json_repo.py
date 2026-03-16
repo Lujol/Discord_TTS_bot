@@ -3,6 +3,8 @@ import asyncio
 
 import os
 import datetime
+
+from src.model.dto.save_custom_voice_dto import SaveCustomVoiceDTO
         
 from .db_interface import ChannelRepository, SettingRepository, VoiceRepository, RecordingRepository
 from src.model.dto import UserSettingsDTO, VoiceInfoDTO, PageResponse,PageRequest, UserRecordingDTO
@@ -133,8 +135,8 @@ class JsonVoiceRepository(VoiceRepository):
         self.google_voices = self._initialize_google_voices()
         self.custom_voices_path = custom_voices_path
         self.custom_voices = self._initialize_custom_voices()
-        self.lock  = asyncio.Lock()
-
+        self.google_lock  = asyncio.Lock()
+        self.elevenlabs_lock  = asyncio.Lock()
 
     def _initialize_google_voices(self) -> dict:
         try:
@@ -218,6 +220,23 @@ class JsonVoiceRepository(VoiceRepository):
         return response
         
         
+    async def save_custom_voice(self, server_id: int, data: SaveCustomVoiceDTO) -> None:
+        
+        server_id_str = str(server_id)
+
+        # 1. dto -> dict
+        data_dict :dict = data.model_dump(exclude_none=True)
+        
+        # 2. 락 
+        async with self.elevenlabs_lock:
+            
+            # 3. server id 및 label이 없을 시 생성 후 업데이트
+            self.custom_voices.setdefault(server_id_str, {}).setdefault(data.label, {}).update(data_dict)
+                
+            with open(self.custom_voices_path, "w", encoding="utf-8") as f:
+                json.dump(self.custom_voices, f, indent=2, ensure_ascii=False)
+
+        
 class JsonRecordingRepository(RecordingRepository):
     
     def __init__(self, data_path: str):
@@ -264,6 +283,7 @@ class JsonRecordingRepository(RecordingRepository):
                 UserRecordingDTO(
                     file_name= fname,
                     label= label,
+                    duration= duration,
                     time_stamp= ts
                 )
             )

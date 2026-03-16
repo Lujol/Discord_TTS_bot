@@ -1,5 +1,5 @@
 from abc import ABC, abstractmethod
-from src.model.dto import UserSettingsDTO, VoiceInfoDTO, PageRequest, PageResponse
+from src.model.dto import UserSettingsDTO, VoiceInfoDTO, PageRequest, PageResponse, SaveCustomVoiceDTO
 
 class ChannelRepository(ABC):
     
@@ -46,6 +46,11 @@ class VoiceRepository(ABC):
     @abstractmethod
     async def get_google_voice(self, page_req: PageRequest) -> PageResponse:
         """ 저장 되어있는 구글 목소리 목록을 반환합니다"""
+        pass
+    
+    @abstractmethod
+    async def save_custom_voice(self, server_id: int, data: SaveCustomVoiceDTO) -> None:
+        """ 사용자의 목소리로 학습 된 목소리의 정보를 저장"""
         pass
     
 class RecordingRepository(ABC):

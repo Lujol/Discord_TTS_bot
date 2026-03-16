@@ -1,6 +1,7 @@
 from src.repository import *
 from src.tts_gen_engine import TTSManager
 from .config import settings
+from src.tts_train import ElevenlabsIVCManager
 
 
 setting_repository : SettingRepository = JsonSettingRepository(
@@ -22,3 +23,5 @@ recording_repository : RecordingRepository = JsonRecordingRepository(
 tts_manager = TTSManager(
     google_key_path= settings.GOOGLE_KEY_PATH, 
     elevenlabs_key= settings.ELEVENLABS_API_KEY)
+
+elevenlabs_ivc_manager = ElevenlabsIVCManager()
