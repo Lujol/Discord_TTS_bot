@@ -1,10 +1,15 @@
 import json
 import asyncio
 
-from .db_interface import ChannelRepository, SettingRepository, VoiceRepository
-from src.model.dto import UserSettingsDTO, VoiceInfoDTO, PageResponse,PageRequest
+import os
+import datetime
+        
+from .db_interface import ChannelRepository, SettingRepository, VoiceRepository, RecordingRepository
+from src.model.dto import UserSettingsDTO, VoiceInfoDTO, PageResponse,PageRequest, UserRecordingDTO
 from src.model.vo import VoiceGender, VoiceLanguage, VoiceType
 from src import apply_filter_and_sort, paging
+
+
 
 class JsonChannelRepository(ChannelRepository):
     
@@ -211,4 +216,77 @@ class JsonVoiceRepository(VoiceRepository):
                                         page_req= page_req)
         
         return response
+        
+        
+class JsonRecordingRepository(RecordingRepository):
+    
+    def __init__(self, data_path: str):
+        self.data_path = data_path
+        self.lock  = asyncio.Lock()
+    
+    async def get_user_recording_list(self, user_id: int, page_req: PageRequest) -> PageResponse:
+
+        os.makedirs(self.data_path, exist_ok=True)
+            
+        all_files = os.listdir(self.data_path)
+        user_files :list[UserRecordingDTO]= []
+        user_id_str = str(user_id) 
+
+
+        for fname in all_files:
+            if not fname.endswith(".wav"):
+                continue
+            
+            parts = fname.split('_')
+            
+            # 구조가 최소 3개 (Name_ID_Time.wav) 이상이어야 함
+            if len(parts) < 3:
+                continue 
+            
+            if user_id_str not in fname: 
+                continue 
+            
+            full_path = os.path.join(self.data_path, fname)
+            timestamp_str = parts[-1].replace(".wav", "")
+
+            ts = 0 
+            try:
+                ts = int(timestamp_str)
+                date_str = datetime.datetime.fromtimestamp(ts).strftime('%Y-%m-%d %H:%M:%S')
+            except Exception:
+                date_str = "Unknown Date"
+
+            duration = await self.get_wav_duration(full_path) 
+            
+            label = f"[{date_str}] ({duration:.1f}초)"
+            
+            user_files.append(
+                UserRecordingDTO(
+                    file_name= fname,
+                    label= label,
+                    time_stamp= ts
+                )
+            )
+        
+        # 필터링 및 정렬
+        processed_files = apply_filter_and_sort(items= user_files,
+                                                filters= page_req.filter,
+                                                sorts= page_req.sort or ["-time_stamp"] )
+        
+        response :PageResponse = paging(filtered_list= processed_files,
+                                        page_req= page_req)
+
+        return response
+    
+    async def get_wav_duration(self,  file_path :str):
+        """ 음성 파일의 길이를 초(float) 단위로 반환"""
+        import wave
+        try:
+            with wave.open(file_path, 'r') as f:
+                frames = f.getnframes()
+                rate = f.getframerate()
+                duration = frames / rate
+                return duration
+        except Exception:
+            return 0.0
         

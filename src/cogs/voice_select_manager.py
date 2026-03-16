@@ -27,9 +27,14 @@ class VoiceSelectManager(commands.Cog):
         else:
             return await voice_repository.get_google_voice(page_req= page)
     
-    async def save_data(self, server_id:int, user_id:int, update_setting :UserSettingsDTO  ) -> None:
+    async def save_data(self, interaction: discord.Interaction , update_setting :UserSettingsDTO  ) -> None:
 
-        await setting_repository.add_user_settings(server_id, user_id, update_setting)
-    
+        if (interaction.guild is None):
+            return
+
+        await setting_repository.add_user_settings(interaction.guild.id, interaction.user.id , update_setting)
+
+        await toast(messege=f"설정이 완료 되었습니다!", interaction= interaction)
+        
 async def setup(bot):
     await bot.add_cog(VoiceSelectManager(bot))

@@ -15,6 +15,10 @@ voice_repository : VoiceRepository = JsonVoiceRepository(
     custom_voices_path= settings.CUSTOM_VOICE_PATH
 )
 
+recording_repository : RecordingRepository = JsonRecordingRepository(
+    data_path= settings.RECORD_DIR_STR
+)
+
 tts_manager = TTSManager(
     google_key_path= settings.GOOGLE_KEY_PATH, 
     elevenlabs_key= settings.ELEVENLABS_API_KEY)

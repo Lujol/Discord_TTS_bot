@@ -4,7 +4,7 @@ from typing import cast, Optional
 from discord import app_commands
 from discord.ext import commands
 import re
-from src.common import toast
+from src.common import toast, ready_and_playing
 from src.core import channel_repository,setting_repository,tts_manager
 
 from src.model.dto import UserSettingsDTO
@@ -39,34 +39,16 @@ class MessageManager(commands.Cog):
             re.search(self.url_pattern, message.content)):
             return 
         
-        # 5. 메시지 작성자가 봇에 dm을 보내는 등 서버에서 작성하는 채팅이 아닌 경우
-        if not message.guild or not isinstance(message.author, discord.Member):
-            return
         
-        # 6. 메시지 작성자가 음성 채널에 존재하는가?
-        if message.author.voice is None or message.author.voice.channel is None:
-            return
+        # 5. 재생 할 음성 생성  
+        audio_binary =await self.get_audio(message)
         
-        # channel : 메시지 작성자가 들어가있는 음성 채널
-        channel = message.author.voice.channel
-        # vc : 해당 서버에 대한 봇의 음성 클라이언트
-        vc = message.guild.voice_client
         
-        # 7.1 봇이 음성 채널에 존재하지 않는 경우 > 해당 채널에 입장
-        if vc is None:
-            await channel.connect()
-            
-        # 7.2 봇이 다른 음성 채널에 존재 할 경우 > 이동
-        elif isinstance(vc, discord.VoiceClient) and vc.channel != channel :
-            await vc.move_to(channel)
-            
-        # 7.3 봇이 해당 채널에 존재 할 경우 > 유지
-        
-        # 8. tts 진행  
-        await self.play_tts(message)
+        # 6. 봇 상태 확인, 이동, 재생
+        await ready_and_playing(ctx= message, audio=audio_binary)
 
 
-    async def play_tts(self, message: discord.Message) -> None:
+    async def get_audio(self, message: discord.Message) -> bytes:
         if message.guild is None:
             raise Exception("[Error] message.guild가 존재하지 않습니다.")
     
@@ -74,22 +56,14 @@ class MessageManager(commands.Cog):
         user_id :int = message.author.id
         message_content :str = message.content
         
-        if message.guild.voice_client is None:
-            raise Exception("[Warn] voice_client가 존재하지 않습니다.")
-        raw_vc = message.guild.voice_client
-        vc = cast(Optional[discord.VoiceClient], raw_vc)
-        
+
         # 유저 설정 조회
         user_settings :UserSettingsDTO = await self.setting_repository.get_user_settings(server_id, user_id)
         
         # 오디오 생성 
         audio_binary = await self.tts_manager.generate_audio(user_settings , server_id, message_content)
-        audio_stream = io.BytesIO(audio_binary)
-        if vc and vc.is_connected():
-            try:
-                vc.play(discord.FFmpegPCMAudio(audio_stream, pipe=True))
-            except Exception as e:
-                raise Exception(f"[Error] 재생 중 오류 발생 ! {e}" )
+
+        return audio_binary
 
 async def setup(bot):
     await bot.add_cog(MessageManager(bot))

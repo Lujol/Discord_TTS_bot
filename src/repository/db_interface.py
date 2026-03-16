@@ -46,3 +46,10 @@ class VoiceRepository(ABC):
     @abstractmethod
     async def get_google_voice(self, page_req: PageRequest) -> PageResponse:
         """ 저장 되어있는 구글 목소리 목록을 반환합니다"""
+        pass
+    
+class RecordingRepository(ABC):
+    @abstractmethod
+    async def get_user_recording_list(self, user_id:int, page_req:PageRequest) -> PageResponse:
+        """ 해당 유저의 녹음본 목록을 반환합니다"""
+        pass

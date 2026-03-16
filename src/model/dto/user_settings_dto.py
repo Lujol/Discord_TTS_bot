@@ -7,3 +7,4 @@ class UserSettingsDTO(BaseModel):
     gender :Optional[VoiceGender] = VoiceGender.NEUTRAL
     voice :Optional[str] =None
     type :Optional[VoiceType] = VoiceType.DEFAULT
+    

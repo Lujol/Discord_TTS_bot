@@ -1,6 +1,7 @@
 import discord
 import asyncio
 import math
+import io
 from typing import TypeVar, Optional, Any
 from src.model.dto import PageRequest, PageResponse
 
@@ -78,4 +79,158 @@ def paging(filtered_list :list , page_req :PageRequest) -> PageResponse:
     
     return response
     
+async def ready_and_playing( ctx: discord.Interaction|discord.Message, audio :str|bytes):
     
+    if isinstance(ctx,discord.Message ):
+        user = ctx.author
+        guild = ctx.guild
+    else:
+        assert isinstance(ctx, discord.Interaction)
+        user = ctx.user
+        guild = ctx.guild
+    
+    # 1. 메시지 작성자가 봇에 dm을 보내는 등 서버에서 작성하는 채팅이 아닌 경우
+    if not guild or not isinstance(user, discord.Member):
+        return
+    
+    # 2. 메시지 작성자가 음성 채널에 존재하는가?
+    if user.voice is None or user.voice.channel is None:
+        return
+    
+    # channel : 메시지 작성자가 들어가있는 음성 채널
+    channel = user.voice.channel
+    # vc : 해당 서버에 대한 봇의 음성 클라이언트
+    vc = guild.voice_client
+
+    
+    # 3. 타입 명시
+    if vc is not None and not isinstance(vc, discord.VoiceClient):
+        return
+    
+    # 4.1 봇이 음성 채널에 존재하지 않는 경우 > 해당 채널에 입장
+    if vc is None :
+        vc = await channel.connect()
+    
+    # 4.2 봇이 다른 음성 채널에 존재 할 경우 > 이동
+    elif  vc.channel != channel :
+        await vc.move_to(channel)
+    
+    # 5. 재생
+    if isinstance(audio, str):
+        try:
+            vc.play(discord.FFmpegPCMAudio(audio))
+        except Exception as e:
+            raise Exception(f"[Error] 재생 중 오류 발생 ! {e}" )
+        
+    elif isinstance(audio, bytes):
+        audio_stream = io.BytesIO(audio)
+        try:
+            vc.play(discord.FFmpegPCMAudio(audio_stream, pipe=True))
+        except Exception as e:
+            raise Exception(f"[Error] 재생 중 오류 발생 ! {e}" )
+        
+async def pause( ctx: discord.Interaction|discord.Message):
+    
+    if isinstance(ctx,discord.Message ):
+        user = ctx.author
+        guild = ctx.guild
+    else:
+        assert isinstance(ctx, discord.Interaction)
+        user = ctx.user
+        guild = ctx.guild
+    
+    # 1. 메시지 작성자가 봇에 dm을 보내는 등 서버에서 작성하는 채팅이 아닌 경우
+    if not guild or not isinstance(user, discord.Member):
+        return
+    
+    # 2. 메시지 작성자가 음성 채널에 존재하는가?
+    if user.voice is None or user.voice.channel is None:
+        return
+    
+    # channel : 메시지 작성자가 들어가있는 음성 채널
+    channel = user.voice.channel
+    # vc : 해당 서버에 대한 봇의 음성 클라이언트
+    vc = guild.voice_client
+
+    
+    # 3. 타입 명시
+    if vc is  None or not isinstance(vc, discord.VoiceClient):
+        return
+    
+    # 4. 재생 중 이면, 일시정지
+    if vc.is_playing():
+        vc.pause()
+        
+    else:
+        return
+    
+
+async def resume( ctx: discord.Interaction|discord.Message):
+    
+    if isinstance(ctx,discord.Message ):
+        user = ctx.author
+        guild = ctx.guild
+    else:
+        assert isinstance(ctx, discord.Interaction)
+        user = ctx.user
+        guild = ctx.guild
+    
+    # 1. 메시지 작성자가 봇에 dm을 보내는 등 서버에서 작성하는 채팅이 아닌 경우
+    if not guild or not isinstance(user, discord.Member):
+        return
+    
+    # 2. 메시지 작성자가 음성 채널에 존재하는가?
+    if user.voice is None or user.voice.channel is None:
+        return
+    
+    # channel : 메시지 작성자가 들어가있는 음성 채널
+    channel = user.voice.channel
+    # vc : 해당 서버에 대한 봇의 음성 클라이언트
+    vc = guild.voice_client
+
+    
+    # 3. 타입 명시
+    if vc is  None or not isinstance(vc, discord.VoiceClient):
+        return
+    
+    # 4. 일시 정지 중이면 다시 재생
+    if vc.is_paused():
+        vc.resume()
+        
+    else:
+        return
+    
+
+async def stop( ctx: discord.Interaction|discord.Message):
+    
+    if isinstance(ctx,discord.Message ):
+        user = ctx.author
+        guild = ctx.guild
+    else:
+        assert isinstance(ctx, discord.Interaction)
+        user = ctx.user
+        guild = ctx.guild
+    
+    # 1. 메시지 작성자가 봇에 dm을 보내는 등 서버에서 작성하는 채팅이 아닌 경우
+    if not guild or not isinstance(user, discord.Member):
+        return
+    
+    # 2. 메시지 작성자가 음성 채널에 존재하는가?
+    if user.voice is None or user.voice.channel is None:
+        return
+    
+    # channel : 메시지 작성자가 들어가있는 음성 채널
+    channel = user.voice.channel
+    # vc : 해당 서버에 대한 봇의 음성 클라이언트
+    vc = guild.voice_client
+
+    
+    # 3. 타입 명시
+    if vc is  None or not isinstance(vc, discord.VoiceClient):
+        return
+    
+    # 4. 재생 중, 일시 정지 중이면 정지
+    if vc.is_playing() or vc.is_paused():
+        vc.stop()
+    else:
+        return

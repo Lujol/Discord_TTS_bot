@@ -11,15 +11,18 @@ from src.ui.page_button import NextPageButton, PrevPageButton, PageInfo
 class VoiceSettingView(PaginationView):
     def __init__(self, get_data, save_data):
         super().__init__(timeout=None)
-        # 타입 선택하는 버튼 생성
-        for voice_type in VoiceType:
-            self.add_item(TypeSelectButton(voice_type= voice_type))
+        
+        self.add_type_select_button()
         
         self.get_data = get_data
         self.save_data = save_data
         
         self.voice_type :VoiceType = VoiceType.DEFAULT
-        
+    
+    def add_type_select_button(self):
+        for voice_type in VoiceType:
+            self.add_item(TypeSelectButton(voice_type= voice_type))
+    
     async def selected_type(self, voice_type: VoiceType, interaction: discord.Interaction):
         """ 사용자가 타입 선택 후 처리
         Args:
@@ -41,6 +44,7 @@ class VoiceSettingView(PaginationView):
                 group_name= "성별",
                 on_select_callback= self.selected_gender
             ))
+            self.add_item(BackButton())
             
         else:
             # page 생성
@@ -50,7 +54,7 @@ class VoiceSettingView(PaginationView):
         
     async def selected_voice(self, voice_id:str, interaction: discord.Interaction):
    
-        await self.save_data(interaction.guild_id, interaction.user.id, UserSettingsDTO(voice= voice_id, type= self.voice_type ))
+        await self.save_data(interaction, UserSettingsDTO(voice= voice_id, type= self.voice_type ))
         
         
     async def selected_region(self, selected_region:list , interaction: discord.Interaction):
@@ -74,6 +78,7 @@ class VoiceSettingView(PaginationView):
         self.add_item(PrevPageButton())
         self.add_item(PageInfo(self.page_res))
         self.add_item(NextPageButton())
+        self.add_item(BackButton())
         
 class VoiceSelect(discord.ui.Select):
     def __init__(self, voice_list :list[VoiceInfoDTO]):
@@ -121,3 +126,15 @@ class TypeSelectButton(discord.ui.Button):
         view :VoiceSettingView = self.view
         
         await view.selected_type(self.voice_type , interaction)
+
+class BackButton(discord.ui.Button):
+    def __init__(self):
+        super().__init__(style=discord.ButtonStyle.primary, label = "⬅️뒤로 가기")
+    
+    async def callback(self, interaction: discord.Interaction):
+        assert isinstance(self.view, VoiceSettingView)
+        view :VoiceSettingView = self.view
+        
+        view.clear_items()
+        view.add_type_select_button()
+        await interaction.response.edit_message(view=view)
