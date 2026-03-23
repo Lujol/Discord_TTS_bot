@@ -22,9 +22,20 @@ class PartyManager(commands.Cog):
         if not isinstance(interaction.user , discord.Member) or  interaction.guild is None:
             return await toast("서버에서만 사용 가능합니다.", interaction) 
         
-        view = PartyView()
+        view = PartyView(
+            interaction,
+            PartyInfoDTO(
+                game= game,
+                person= person,
+                meridiem= meridiem,
+                time= time,
+                detail= detail
+            )
+        )
 
         await interaction.response.send_message(view=view)
 
+        # view.message = await interaction.original_response()
+        
 async def setup(bot):
     await bot.add_cog(PartyManager(bot))
