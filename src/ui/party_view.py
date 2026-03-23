@@ -15,7 +15,7 @@ class PartyView(LayoutView):
             return 
         
         
-        self.add_item(TextDisplay(f"**{interaction.user.name}**님의 파티"))
+        self.add_item(TextDisplay(f"**{interaction.user.mention}**님의 파티"))
         
         self.container = PartyContainer(interaction.user, party_info)
         
@@ -58,7 +58,7 @@ class PartyContainer(Container):
         self.join_button.callback = join_callback  
         
         # 파티 탈퇴 버튼
-        self.exit_button :Button= Button(label="파티 탈퇴" , style= discord.ButtonStyle.gray) 
+        self.exit_button :Button= Button(label="파티 탈퇴" , style= discord.ButtonStyle.danger) 
         async def exit_callback(interaction : discord.Interaction):
             if not isinstance(interaction.user,discord.Member):
                 return 
@@ -91,24 +91,24 @@ class PartyContainer(Container):
         self.disband_button.callback = disband_callback 
         
         # 파티 초대 버튼
-        self.invite_button :Button= Button(label="파티 초대" , style= discord.ButtonStyle.gray) 
+        self.invite_button :Button= Button(label="파티 초대" , style= discord.ButtonStyle.primary) 
         async def invite_callback(interaction : discord.Interaction):
             
-            # TODO modal 띄우기.  파티초대 
-            # modal 불가. 
             max_values = self.person - len(self.member_list)
             
-            await interaction.response.send_message(view=UserSelectView(add_member=self.add_member, max_values= max_values) )
+            await interaction.response.send_message(view=UserSelectView(add_member=self.add_member, max_values= max_values), ephemeral= True )
             
             
         self.invite_button.callback = invite_callback 
         
         # 현재 인원 멘션
-        self.mention_button :Button= Button(label="멤버 호출" , style= discord.ButtonStyle.gray) 
+        self.mention_button :Button= Button(label="멤버 호출" , style= discord.ButtonStyle.primary) 
         async def mention_callback(interaction : discord.Interaction):
+
+            text = " ".join([member.mention for member in self.member_list])
             
-            # TODO 멘션 
-            print("temp")
+            await interaction.response.send_message(f"집합!! {text}")
+
             
         self.mention_button.callback = mention_callback 
         
@@ -146,22 +146,25 @@ class PartyContainer(Container):
         
     def build_container(self):
         self.clear_items()
-        self.add_item(TextDisplay(f" **{self.game}**  {len(self.member_list)}/{self.person} \n {self.detail}\n**파티원**"))
+        
+        detail_text = f"\n\n{self.detail}" if self.detail else ""
+        
+        self.add_item(TextDisplay(f" ## {self.game}\t\t\t\t{self.time}  {detail_text}\n### 파티원\t\t\t\t\t\t{len(self.member_list)}/{self.person}\n"))
         
         member_text = "\n".join([f"• {member.mention}" for member in self.member_list])
  
-        self.add_item(TextDisplay(f"{member_text}"))
+        self.add_item(TextDisplay(f"{member_text}\n\n⠀"))
         
         button_row = ActionRow()
         button_row.add_item(self.join_button)
-        button_row.add_item(self.exit_button)
-        button_row.add_item(self.disband_button)
         button_row.add_item(self.invite_button)
+        button_row.add_item(self.exit_button)
 
         
         button_row_2 = ActionRow()
-        button_row_2.add_item(self.mention_button)
         button_row_2.add_item(self.setting_button)
+        button_row_2.add_item(self.mention_button)
+        button_row_2.add_item(self.disband_button)
         self.add_item(button_row)
         self.add_item(button_row_2)
         
@@ -196,7 +199,7 @@ class UserSelectView(LayoutView):
             try:
                 await add_member(interaction,self.selected_member)
             except Exception as e:
-                print(f" [Error] 몬가몬가 오류 : {e}")
+                print(f" [Error] 멤버 추가 중 오류 : {e}")
                 
             await toast("파티 초대 완료", interaction=interaction)
         seleted_btn.callback = seleted_btn_callback
