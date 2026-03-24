@@ -3,11 +3,9 @@ import asyncio
 
 import os
 import datetime
-
-from src.model.dto.save_custom_voice_dto import SaveCustomVoiceDTO
         
-from .db_interface import ChannelRepository, SettingRepository, VoiceRepository, RecordingRepository
-from src.model.dto import UserSettingsDTO, VoiceInfoDTO, PageResponse,PageRequest, UserRecordingDTO
+from .db_interface import ChannelRepository, SettingRepository, VoiceRepository, RecordingRepository, InfoRepository
+from src.model.dto import UserSettingsDTO, VoiceInfoDTO, PageResponse,PageRequest, UserRecordingDTO, SaveCustomVoiceDTO
 from src.model.vo import VoiceGender, VoiceLanguage, VoiceType
 from src import apply_filter_and_sort, paging
 
@@ -310,3 +308,36 @@ class JsonRecordingRepository(RecordingRepository):
         except Exception:
             return 0.0
         
+
+class JsonInfoRepository(InfoRepository):
+    
+    def __init__(self, info_path: str):
+        self.info_path = info_path
+        
+    async def get_help(self) -> str:
+        try:
+            with open(self.info_path, 'r', encoding='utf-8') as f:
+                data  =  json.load(f)
+                return data.get("help","")
+        except (FileNotFoundError, json.JSONDecodeError):
+            print(f"[Warn] {self.info_path} 파일이 없거나 비어있습니다.")
+            return ""
+    
+    
+    async def get_patch(self) -> str:
+        try:
+            with open(self.info_path, 'r', encoding='utf-8') as f:
+                data  =  json.load(f)
+                return data.get("patch","")
+        except (FileNotFoundError, json.JSONDecodeError):
+            print(f"[Warn] {self.info_path} 파일이 없거나 비어있습니다.")
+            return ""
+    
+    async def get_tts_help(self) -> str:
+        try:
+            with open(self.info_path, 'r', encoding='utf-8') as f:
+                data  =  json.load(f)
+                return data.get("tts_help","")
+        except (FileNotFoundError, json.JSONDecodeError):
+            print(f"[Warn] {self.info_path} 파일이 없거나 비어있습니다.")
+            return ""

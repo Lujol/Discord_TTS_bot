@@ -43,6 +43,9 @@ class Config:
     # 사용 시 str로 사용하기 위함
     RECORD_DIR_STR = str(RECORD_DIR)
     
+    info = os.getenv("INFO", 'info.json')
+    INFO_PATH = str(DATA_DIR / info)
+    
 
     
 settings = Config()

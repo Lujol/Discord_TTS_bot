@@ -58,3 +58,21 @@ class RecordingRepository(ABC):
     async def get_user_recording_list(self, user_id:int, page_req:PageRequest) -> PageResponse:
         """ 해당 유저의 녹음본 목록을 반환합니다"""
         pass
+    
+class InfoRepository(ABC):
+    @abstractmethod
+    async def get_help(self) -> str:
+        """ 도움말을 불러옵니다 """
+        pass
+    
+    @abstractmethod
+    async def get_patch(self) -> str:
+        """ 패치노트를 불러옵니다 """
+        pass
+    
+    @abstractmethod
+    async def get_tts_help(self) -> str:
+        """ tts 도움말을 불러옵니다 """
+        pass
+    
+    

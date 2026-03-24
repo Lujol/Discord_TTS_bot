@@ -20,6 +20,10 @@ recording_repository : RecordingRepository = JsonRecordingRepository(
     data_path= settings.RECORD_DIR_STR
 )
 
+info_repository : InfoRepository = JsonInfoRepository(
+    info_path= settings.INFO_PATH
+)
+
 tts_manager = TTSManager(
     google_key_path= settings.GOOGLE_KEY_PATH, 
     elevenlabs_key= settings.ELEVENLABS_API_KEY)
