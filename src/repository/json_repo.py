@@ -337,7 +337,10 @@ class JsonInfoRepository(InfoRepository):
         try:
             with open(self.info_path, 'r', encoding='utf-8') as f:
                 data  =  json.load(f)
-                return data.get("tts_help","")
+                des =  data.get("tts_help","")
+                if isinstance(des, list):
+                    return "\n".join(des)
+                return ""
         except (FileNotFoundError, json.JSONDecodeError):
             print(f"[Warn] {self.info_path} 파일이 없거나 비어있습니다.")
             return ""

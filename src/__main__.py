@@ -19,7 +19,7 @@ class Bot(commands.Bot):
         await self.load_extensions()
 
         print("슬래시 커맨드 동기화 중...")
-        print(settings.TEST_SERVER_Id)
+        
         if settings.TEST_SERVER_Id is None:
             raise ValueError("환경변수에 TEST_SERVER_Id가 없습니다! .env 파일을 확인하세요.")
         
@@ -35,9 +35,8 @@ class Bot(commands.Bot):
 
     #  봇이 성공적으로 디스코드에 연결되었을 때
     async def on_ready(self):
-        
         # 봇 상태 메시지 설정
-        await self.change_presence(activity=discord.Game(name="목소리 변환"))
+        await self.change_presence(activity=discord.Game(name="TTS 봇"))
 
     async def load_extensions(self):
         for filename in os.listdir('src/cogs'):
@@ -48,11 +47,10 @@ class Bot(commands.Bot):
             
 
 if __name__ == "__main__":
-    # 디스코드 기본 로거 활성화 
+    # 디스코드 기본 로거
     discord.utils.setup_logging()
 
     bot = Bot()
-    
     if settings.TOKEN is None:
         raise ValueError("환경변수에 DISCORD_TOKEN이 없습니다! .env 파일을 확인하세요.")
         

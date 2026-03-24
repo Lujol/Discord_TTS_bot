@@ -3,7 +3,6 @@ from discord.ext import voice_recv
 import wave
 import time
 import os
-from typing import Optional
 
 from src import settings
 
