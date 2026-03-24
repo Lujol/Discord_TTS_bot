@@ -1,0 +1,26 @@
+[project]
+name = "discord-tts-bot"
+version = "0.1.0"
+description = ""
+authors = [
+    {name = "Lujol"}
+]
+requires-python = "^3.11"
+dependencies = [
+    "celery (>=5.6.2,<6.0.0)",
+    "discord-py (>=2.7.1,<3.0.0)",
+    "elevenlabs (>=2.40.0,<3.0.0)",
+    "pydub (>=0.25.1,<0.26.0)",
+    "python-dotenv (>=1.2.2,<2.0.0)",
+    "requests (>=2.32.5,<3.0.0)",
+    "google-cloud-texttospeech (>=2.34.0,<3.0.0)",
+
+    # 현재 버전은 discord dave 복호화 지원을 안하기에 오류 발생
+    #"discord-ext-voice-recv (>=0.5.2a179,<0.6.0)"
+    # 버전 업데이트 될 때 까지는 아래의 라이브러리 사용
+    "discord-ext-voice-recv @ git+https://github.com/rdphillips7/discord-ext-voice-recv.git"
+]
+
+[build-system]
+requires = ["poetry-core>=2.0.0,<3.0.0"]
+build-backend = "poetry.core.masonry.api"
