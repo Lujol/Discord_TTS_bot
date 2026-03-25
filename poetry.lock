@@ -900,16 +900,14 @@ files = [
 ]
 
 [[package]]
-name = "discord-ext-voice-recv"
-version = "0.5.2a179"
+name = "discord-ext-voice_recv"
+version = "0.5.3a0"
 description = "Experimental voice receive extension for discord.py"
 optional = false
 python-versions = ">=3.8"
 groups = ["main"]
-files = [
-    {file = "discord_ext_voice_recv-0.5.2a179-py3-none-any.whl", hash = "sha256:f3fa65f2c1591bef2382aa39f3ebc25d6751b405aef5b5d113dfb452640f29fc"},
-    {file = "discord_ext_voice_recv-0.5.2a179.tar.gz", hash = "sha256:6cb8f5ff60c3885020e5ebd879323dc97ebb0745788f3778a14ef31810f848a8"},
-]
+files = []
+develop = false
 
 [package.dependencies]
 "discord.py" = {version = ">=2.5", extras = ["voice"]}
@@ -918,6 +916,12 @@ files = [
 extras = ["SpeechRecognition", "pyaudio"]
 extras-local = ["pyaudio"]
 extras-speech = ["SpeechRecognition"]
+
+[package.source]
+type = "git"
+url = "https://github.com/rdphillips7/discord-ext-voice-recv.git"
+reference = "HEAD"
+resolved_reference = "ddd28601fe556f585b869e215f29c8236b95f88f"
 
 [[package]]
 name = "discord-py"
@@ -2384,4 +2388,4 @@ propcache = ">=0.2.1"
 [metadata]
 lock-version = "2.1"
 python-versions = "^3.11"
-content-hash = "abae8d7f1c3b0b500a284d851de4bfd6d066d2c76356c3d7e7e7f177c4ed7faa"
+content-hash = "39226edf15d74c39e7ba175270ff880e283dc07cb65e28607a0bf1eca67fea2a"
