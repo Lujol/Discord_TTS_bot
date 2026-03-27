@@ -7,4 +7,5 @@ services:
     volumes:
       - ./google_key.json:/app/google_key.json:ro
       - ./data:/app/data
+      - ./logs:/app/logs
     restart: always
