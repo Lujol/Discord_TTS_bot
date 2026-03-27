@@ -62,7 +62,10 @@ class ElevenlabsIVCManager:
             voice = await self.client.voices.ivc.create(
                 name=voice_name,
                 description=description,
-                files=files_to_upload
+                files=files_to_upload,
+                labels={
+                    "language": "ko"
+                }
             )
         
 
