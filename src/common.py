@@ -12,9 +12,7 @@ async def toast(messege: str,interaction: discord.Interaction):
     await asyncio.sleep(3)
     await interaction.delete_original_response()
     
-
-
-
+    
 T = TypeVar('T')
 
 def apply_filter_and_sort(
