@@ -182,3 +182,4 @@ cython_debug/
 /.resume
 /data
 google_key.json
+.vscode/settings.json
