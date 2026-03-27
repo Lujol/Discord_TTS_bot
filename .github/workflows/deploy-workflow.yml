@@ -1,0 +1,61 @@
+name: Deploy
+
+on:
+  workflow_call:
+    inputs:
+      service-name: # 서비스 이름
+        required: true
+        type: string
+
+      image-tag: # 이미지 태그
+        required: true
+        type: string
+
+    secrets:
+      BASE_DIR_PATH:
+        required: true
+      SECRET_NAME:
+        required: true
+
+env:
+  REGISTRY: docker.io
+
+jobs:
+  deploy:
+    name: 서버 배포
+    runs-on: self-hosted # 서버 컴퓨터에서 실행
+
+    steps:
+      - name: Checkout docker-compose
+        uses: actions/checkout@v5
+        with:
+          sparse-checkout: |
+            docker-compose.yml
+          path: temp
+
+      - name: Update and Deploy
+        run: |
+          
+          TARGET_DIR=${{ secrets.BASE_DIR_PATH }}
+          
+          mkdir -p $TARGET_DIR
+
+          # compose를 실행 될 폴더로 복사
+          cp temp/docker-compose.yml $TARGET_DIR/
+          
+          # 이동
+          cd $TARGET_DIR
+
+          # 진행 중 오류가 발생하는 등 중지시 env 삭제
+          trap 'rm -f .env;' EXIT
+
+          # 구글 secret manager 내 env 파일 가져오기
+          gcloud secrets versions access latest --secret="${{secrets.SECRET_NAME}}" > .env
+
+          chmod 600 .env
+
+          docker compose pull
+          docker compose up -d
+
+          rm -f .env
+          trap - EXIT
