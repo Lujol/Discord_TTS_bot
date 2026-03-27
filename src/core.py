@@ -3,7 +3,6 @@ from src.tts_gen_engine import TTSManager
 from .config import settings
 from src.tts_train import ElevenlabsIVCManager
 
-
 setting_repository : SettingRepository = JsonSettingRepository(
     settings_path= settings.SETTINGS_PATH)
 
@@ -29,3 +28,4 @@ tts_manager = TTSManager(
     elevenlabs_key= settings.ELEVENLABS_API_KEY)
 
 elevenlabs_ivc_manager = ElevenlabsIVCManager()
+

@@ -4,15 +4,17 @@ from elevenlabs.client import AsyncElevenLabs
 import io
 from pydub import AudioSegment
 
-from src import settings
+from src import settings, get_logger
 
 class ElevenlabsIVCManager:
     def __init__(self):
-        
+
         api_key= settings.ELEVENLABS_API_KEY
+        self.logger = get_logger(__name__)
         
         if not api_key:
-            raise ValueError("[Error] API 키를 찾을 수 없습니다. .env 파일을 확인하세요.")
+            self.logger.error("API 키를 찾을 수 없습니다. .env 파일을 확인하세요.")
+            raise ValueError("ELEVENLABS_API_KEY is missing or empty")
 
         self.client = AsyncElevenLabs(api_key=api_key)
 
@@ -33,7 +35,7 @@ class ElevenlabsIVCManager:
                 if mp3_path:
                     processed_paths.append(mp3_path)
                 else:
-                    print(f"[Warn] mp3 변환 실패 : {path} , {voice_name}")
+                    self.logger.error(f"mp3 변환 실패 : {path} , {voice_name}")
                     
             elif  path.lower().endswith(".mp3"):
                 processed_paths.append(path)
@@ -54,7 +56,7 @@ class ElevenlabsIVCManager:
                 file_io = await asyncio.to_thread(read_file_safe, path)
                 files_to_upload.append(file_io)
                 
-            print(f"[Info] IVC 생성 시작... (파일 {len(files_to_upload)}개), {voice_name}")
+            self.logger.info(f"IVC 생성 시작... (파일 {len(files_to_upload)}개), {voice_name}")
             
             # 4. 비동기로 호출
             voice = await self.client.voices.ivc.create(
@@ -64,12 +66,12 @@ class ElevenlabsIVCManager:
             )
         
 
-            print(f"[Info] IVC 생성 성공 name : {voice_name}, id: {voice.voice_id}")
+            self.logger.info(f"IVC 생성 성공 name : {voice_name}, id: {voice.voice_id}")
             return voice.voice_id
         
         except Exception as e:
-            print(f"[Error] ElevenLabs API 오류: {e}")
-            return None
+            self.logger.exception("ElevenLabs API 오류")
+            raise
 
     def wav_to_mp3(self, file_path):
         try:
@@ -81,6 +83,6 @@ class ElevenlabsIVCManager:
 
             return output_file
         except Exception as e:
-            print(f"[Error] mp3 변환 중 오류 발생: {e}")
-            return None
+            self.logger.exception("mp3 변환 중 오류 발생")
+            raise
         

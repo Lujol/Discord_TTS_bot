@@ -7,7 +7,7 @@ import datetime
 from .db_interface import ChannelRepository, SettingRepository, VoiceRepository, RecordingRepository, InfoRepository
 from src.model.dto import UserSettingsDTO, VoiceInfoDTO, PageResponse,PageRequest, UserRecordingDTO, SaveCustomVoiceDTO
 from src.model.vo import VoiceGender, VoiceLanguage, VoiceType
-from src import apply_filter_and_sort, paging
+from src import apply_filter_and_sort, paging, get_logger
 
 
 
@@ -17,6 +17,7 @@ class JsonChannelRepository(ChannelRepository):
         self.target_channel_path = target_channel_path
         self.target_channels = self._initialize_target_channels()
         self.channel_lock  = asyncio.Lock()
+        self.logger = get_logger(__name__)
 
 
     def _initialize_target_channels(self) -> set[int]:
@@ -24,7 +25,7 @@ class JsonChannelRepository(ChannelRepository):
             with open(self.target_channel_path, 'r', encoding='utf-8') as f:
                 return set(json.load(f))
         except (FileNotFoundError, json.JSONDecodeError):
-            print(f"[Warn] {self.target_channel_path} 파일이 없거나 비어있습니다.")
+            self.logger.warning(f"{self.target_channel_path} 파일이 없거나 비어있습니다.")
             return set()
             
 
@@ -77,13 +78,13 @@ class JsonSettingRepository(SettingRepository):
         self.settings_path = settings_path
         self.user_settings  = self._initialize_user_settings()
         self.settings_lock = asyncio.Lock()
-        
+        self.logger = get_logger(__name__)
     def _initialize_user_settings(self) -> dict:
         try:
             with open(self.settings_path, 'r', encoding='utf-8') as f:
                 return json.load(f)
         except (FileNotFoundError, json.JSONDecodeError):
-            print(f"[Warn] {self.settings_path} 파일이 없거나 비어있습니다.")
+            self.logger.warning(f"{self.settings_path} 파일이 없거나 비어있습니다.")
             return {}
 
     async def get_user_settings(self, server_id :int, user_id :int) -> UserSettingsDTO:
@@ -135,13 +136,14 @@ class JsonVoiceRepository(VoiceRepository):
         self.custom_voices = self._initialize_custom_voices()
         self.google_lock  = asyncio.Lock()
         self.elevenlabs_lock  = asyncio.Lock()
+        self.logger = get_logger(__name__)
 
     def _initialize_google_voices(self) -> dict:
         try:
             with open(self.google_voices_path, 'r', encoding='utf-8') as f:
                 return json.load(f)
         except (FileNotFoundError, json.JSONDecodeError):
-            print(f"[Warn] {self.google_voices_path} 파일이 없거나 비어있습니다.")
+            self.logger.warning(f"{self.google_voices_path} 파일이 없거나 비어있습니다.")
             return {}
 
     def _initialize_custom_voices(self) -> dict:
@@ -149,7 +151,7 @@ class JsonVoiceRepository(VoiceRepository):
             with open(self.custom_voices_path, 'r', encoding='utf-8') as f:
                 return json.load(f)
         except (FileNotFoundError, json.JSONDecodeError):
-            print(f"[Warn] {self.custom_voices_path} 파일이 없거나 비어있습니다.")
+            self.logger.warning(f"{self.custom_voices_path} 파일이 없거나 비어있습니다.")
             return {}
         
     
@@ -313,14 +315,14 @@ class JsonInfoRepository(InfoRepository):
     
     def __init__(self, info_path: str):
         self.info_path = info_path
-        
+        self.logger = get_logger(__name__)
     async def get_help(self) -> str:
         try:
             with open(self.info_path, 'r', encoding='utf-8') as f:
                 data  =  json.load(f)
                 return data.get("help","")
         except (FileNotFoundError, json.JSONDecodeError):
-            print(f"[Warn] {self.info_path} 파일이 없거나 비어있습니다.")
+            self.logger.warning(f"{self.info_path} 파일이 없거나 비어있습니다.")
             return ""
     
     
@@ -330,7 +332,7 @@ class JsonInfoRepository(InfoRepository):
                 data  =  json.load(f)
                 return data.get("patch","")
         except (FileNotFoundError, json.JSONDecodeError):
-            print(f"[Warn] {self.info_path} 파일이 없거나 비어있습니다.")
+            self.logger.warning(f"[Warn] {self.info_path} 파일이 없거나 비어있습니다.")
             return ""
     
     async def get_tts_help(self) -> str:
@@ -342,5 +344,5 @@ class JsonInfoRepository(InfoRepository):
                     return "\n".join(des)
                 return ""
         except (FileNotFoundError, json.JSONDecodeError):
-            print(f"[Warn] {self.info_path} 파일이 없거나 비어있습니다.")
+            self.logger.warning(f"[Warn] {self.info_path} 파일이 없거나 비어있습니다.")
             return ""

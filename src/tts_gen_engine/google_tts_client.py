@@ -2,15 +2,17 @@ from google.cloud import texttospeech
 from src.tts_gen_engine import BaseClient
 from src.model.dto import VoiceInfoDTO
 from src.model.vo import VoiceGender,VoiceLanguage
+from src import get_logger
 
 class GoogleTTSClient(BaseClient):
     
     def __init__(self, key_path :str):
+        self.logger = get_logger(__name__)
         try:
             self.client = texttospeech.TextToSpeechClient.from_service_account_file(key_path)
-            print(f"[Info] Google TTS Client 생성 성공.")
+            self.logger.info(f"Google TTS Client 생성 성공.")
         except  Exception as e:
-            print(f"[Error] Google TTS Client 생성 실패: {e}")
+            self.logger.error(f"Google TTS Client 생성 실패: {e}")
             raise e
         
     async def generate_audio(self, voice_setting :VoiceInfoDTO, text :str) -> bytes:
@@ -50,20 +52,20 @@ class GoogleTTSClient(BaseClient):
                 language_code=language_code
             )
 
+        try: 
         # API 호출
-        response = self.client.synthesize_speech(
-            # 위에서 설정한 설정 들 주입
-            input=synthesis_input, 
-            audio_config=audio_config,
-        
-            # 목소리 설정 주입
-            voice=voice_params
-        )
+            response = self.client.synthesize_speech(
+                # 위에서 설정한 설정 들 주입
+                input=synthesis_input, 
+                audio_config=audio_config,
+            
+                # 목소리 설정 주입
+                voice=voice_params
+            )
 
-        audio_binary = response.audio_content
-
-        if audio_binary:
+            audio_binary = response.audio_content
 
             return audio_binary
-        else: 
-            raise Exception("[Warn] google 오디오 데이터가 생성되지 않았습니다.")
+        except Exception as e: 
+            self.logger.exception("google 오디오 데이터가 생성되지 않았습니다.")
+            raise

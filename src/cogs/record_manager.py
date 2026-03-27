@@ -12,6 +12,7 @@ from src.record import MultiTrackWavSink
 from src.ui import RecordView ,RecordingView
 from src.model.dto import PageRequest, PageResponse
 from src.core import recording_repository
+from src import get_logger
 
 class RecordManager(commands.Cog):
     
@@ -21,7 +22,8 @@ class RecordManager(commands.Cog):
         self.sinks : dict[int, MultiTrackWavSink] = {}
         
         self.recording_repository =recording_repository
-
+        
+        self.logger = get_logger(__name__)
     @app_commands.command(name="녹음",description="tts 학습 용 녹음")
     # @app_commands.describe(mode='개인/전체 녹음 골라주세요 전체 녹음으로도 각 사용자별로 따로 녹음 됩니다!')
     # @app_commands.choices(mode=[
@@ -92,7 +94,7 @@ class RecordManager(commands.Cog):
         recording_time =  await self.stop_recording(interaction)
         
         if recording_time is None:
-            print(f"[Error] 녹음 종료 중 문제 발생 : {interaction.user.id}")
+            self.logger.error(f"녹음 종료 중 문제 발생 : {interaction.user.id}")
             return await toast("녹음 종료 중 문제 발생", interaction=interaction)
 
         await interaction.response.send_message(

@@ -8,7 +8,7 @@ from src.core import elevenlabs_ivc_manager, recording_repository, voice_reposit
 from src.ui import TrainPagedView
 from src.model.dto import PageRequest, PageResponse, SaveCustomVoiceDTO
 from src.model.vo import VoiceProvider
-from src import settings, toast
+from src import settings, toast, get_logger
 
 class TTSTrainManager(commands.Cog):
     def __init__(self, bot):
@@ -16,6 +16,7 @@ class TTSTrainManager(commands.Cog):
         self.ivc_manager = elevenlabs_ivc_manager
         self.recording_repository =recording_repository
         self.voice_repository = voice_repository
+        self.logger = get_logger(__name__)
         
     @app_commands.command(name="tts빠른학습", description="본인 목소리 1~3분짜리 데이터로 학습합니다.(3분 이내로 맞출것)")
     @app_commands.describe(tts_name = '저장 할 tts의 이름')
@@ -75,7 +76,7 @@ class TTSTrainManager(commands.Cog):
                 description=f"Discord IVC created by {interaction.user.display_name}"
             )
         except Exception as e:
-            print(f"[Error] IVC 학습 중 에러 발생 : {e}")
+            self.logger.error(f"IVC 학습 중 에러 발생 : {e}")
             await interaction.edit_original_response(
                 content=f"학습 중 오류 발생! \n 봇 관리자에게 문의해주세요", 
                 view=None)
@@ -99,7 +100,7 @@ class TTSTrainManager(commands.Cog):
                 )
                 
             except Exception as e:
-                print(f"저장 중 에러: {e}")
+                self.logger.error(f"저장 중 에러: {e}")
 
                 await interaction.edit_original_response(
                         content="저장 중 오류! 봇 관리자에게 문의해주세요", 

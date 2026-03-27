@@ -13,6 +13,7 @@ class Config:
     # 프로젝트 루트 경로. env 에는 해당 파일 명만 
     BASE_DIR = Path(__file__).resolve().parent.parent
     DATA_DIR = BASE_DIR / "data"
+    DATA_DIR.mkdir(exist_ok=True)
     
     # 구글은 키 파일의 경로를 사용
     google_key_name = os.getenv('GOOGLE_KEY', "google_key.json")
@@ -46,6 +47,13 @@ class Config:
     info = os.getenv("INFO", 'info.json')
     INFO_PATH = str(DATA_DIR / info)
     
-
+    # 로그 레벨
+    LOG_LEVEL = os.getenv("LOG_LEVEL", 'INFO')
+    # 로그 폴더 
+    LOG_DIR = BASE_DIR / "logs"
+    LOG_DIR.mkdir(exist_ok=True)
+    # 로그 파일
+    LOG_FILE = LOG_DIR / "log_event.log"
+    LOG_FILE.touch(exist_ok=True)
     
 settings = Config()

@@ -4,7 +4,7 @@ import wave
 import time
 import os
 
-from src import settings
+from src import settings, get_logger
 
 class MultiTrackWavSink(voice_recv.AudioSink):
 
@@ -16,6 +16,8 @@ class MultiTrackWavSink(voice_recv.AudioSink):
         self.output_files = []
         self.target_user_id = str(target_user_id) if target_user_id else None
 
+        self.logger = get_logger(__name__)
+        
         if not os.path.exists(output_dir):
             os.makedirs(output_dir)
 
@@ -39,7 +41,7 @@ class MultiTrackWavSink(voice_recv.AudioSink):
             if(self.type == 1):
 
                 filename = f"{self.output_dir}/verify_{user_id}.wav"
-            print(f"[Info] 녹음 시작: {user.name} -> {filename}")
+            self.logger.debug(f"녹음 시작: {user.name} -> {filename}")
 
             self.output_files.append(filename)
 
@@ -62,9 +64,9 @@ class MultiTrackWavSink(voice_recv.AudioSink):
         for user_id, f in self.files.items():
             try:
                 f.close()
-                print(f"[Info] 녹음 된 파일이 저장되었습니다: {user_id}")
+                self.logger.debug(f"녹음 된 파일이 저장되었습니다: {user_id}")
             except Exception as e:
-                print(f"[Error] 녹음 종료 중 에러 {user_id}: {e}")
+                self.logger.error(f"녹음 종료 중 에러 {user_id}: {e}")
         self.files.clear()
 
 
