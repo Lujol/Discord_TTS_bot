@@ -1,0 +1,11 @@
+services:
+  discord-bot:
+    image: lujol/tts-bot:latest
+    container_name: tts-bot
+    env_file:
+      - .env
+    volumes:
+      - ./google_key.json:/app/google_key.json:ro
+      - ./data:/app/data
+      - ./logs:/app/logs
+    restart: always

@@ -1,0 +1,20 @@
+
+.env
+
+.venv/
+venv/
+
+# 파이썬 캐시
+__pycache__/
+*.pyc
+
+/data/
+google_key.json
+
+.gitattributes
+.gitignore
+.git
+
+Dockerfile
+docker-compose.yml
+.dockerignore

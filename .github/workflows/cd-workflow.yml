@@ -1,5 +1,6 @@
 name: CD Workflow
 concurrency: # 동시 실행 제어
+
   group: ${{ github.workflow }}
   cancel-in-progress: false # 진행 중인 배포가 있다면 취소하지 않고 대기 (순차 배포)
 
