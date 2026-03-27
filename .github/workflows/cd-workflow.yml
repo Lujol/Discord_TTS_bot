@@ -24,8 +24,7 @@ jobs:
     secrets: # 필요한 시크릿
       DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
       DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
-      BASE_DIR_PATH: ${{ secrets.BASE_DIR_PATH }}
-      SECRET_NAME: ${{ secrets.SECRET_NAME }}
+
 
     with: # 필요한 파라미터
       service-name: tts-bot
@@ -37,7 +36,8 @@ jobs:
     needs: releasing
     uses: ./.github/workflows/deploy-workflow.yml
     secrets:
-      DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
+      BASE_DIR_PATH: ${{ secrets.BASE_DIR_PATH }}
+      SECRET_NAME: ${{ secrets.SECRET_NAME }}
 
     with:
       service-name: tts-bot
