@@ -86,6 +86,7 @@ jobs:
           images: ${{ env.REGISTRY }}/${{ secrets.DOCKER_USERNAME }}/${{ inputs.service-name }}
           tags: |
             type=raw,value=${{ needs.tagging.outputs.tag_name }}
+            type=raw,value=latest
 
       - name: Build and Push Image
         uses: docker/build-push-action@v5
