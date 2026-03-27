@@ -27,10 +27,12 @@ jobs:
 
     steps:
       - name: Checkout docker-compose
-        uses: actions/checkout@v5
+        uses: actions/checkout@v4
         with:
           sparse-checkout: |
             docker-compose.yml
+          # 폴더가 아닌 파일을 복사하도록
+          sparse-checkout-cone-mode: false
           path: temp
 
       - name: Update and Deploy
