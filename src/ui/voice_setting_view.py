@@ -59,12 +59,12 @@ class VoiceSettingView(PaginationView):
         
     async def selected_region(self, selected_region:list , interaction: discord.Interaction):
         
-        await self.save_data(interaction.guild_id, interaction.user.id, UserSettingsDTO(language=selected_region[0], type= self.voice_type ))
+        await self.save_data(interaction, UserSettingsDTO(language=selected_region[0], type= self.voice_type ))
         
         
     async def selected_gender(self, selected_gender:list , interaction: discord.Interaction):
         
-        await self.save_data(interaction.guild_id, interaction.user.id, UserSettingsDTO(gender=selected_gender[0], type= self.voice_type ))
+        await self.save_data(interaction, UserSettingsDTO(gender=selected_gender[0], type= self.voice_type ))
         
     # 상위 메서드 구현 
     async def build_page(self , interaction :discord.Interaction):

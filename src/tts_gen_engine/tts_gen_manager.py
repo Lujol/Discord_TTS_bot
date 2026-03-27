@@ -34,8 +34,9 @@ class TTSManager:
         
         if voice_type == VoiceType.CUSTOM:
             provider_type= VoiceProvider.ELEVENLABS 
-            voice_setting  = await self.voice_repository.find_custom_voice_info(server_id ,user_setting.voice)
-
+            # voice_setting  = await self.voice_repository.find_custom_voice_info(server_id ,user_setting.voice)
+            voice_setting  = VoiceInfoDTO(voice_id = user_setting.voice)
+            
         if voice_type in (VoiceType.DYNAMIC , None) or voice_setting is None:
             provider_type= VoiceProvider.GOOGLE
             voice_setting = VoiceInfoDTO(
