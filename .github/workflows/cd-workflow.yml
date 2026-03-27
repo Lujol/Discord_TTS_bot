@@ -1,0 +1,43 @@
+name: CD Workflow
+concurrency: # 동시 실행 제어
+  cancel-in-progress: false # 진행 중인 배포가 있다면 취소하지 않고 대기 (순차 배포)
+
+on:
+  push:
+    branches:
+      - main
+
+  # 수동 실행 가능
+  workflow_dispatch:
+
+permissions:
+  contents: write  #코드, 태그, 릴리스 
+  id-token: write  #OIDC 토큰 생성
+  attestations: write # 보증 서명
+
+jobs:
+  # 태깅 및 이미지 빌드
+  releasing:
+    uses: ./.github/workflows/release-workflow.yml
+    secrets: # 필요한 시크릿
+      DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
+      DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
+      BASE_DIR_PATH: ${{ secrets.BASE_DIR_PATH }}
+      SECRET_NAME: ${{ secrets.SECRET_NAME }}
+      
+    with: # 필요한 파라미터
+      service-name: tts-bot
+      file-name: Dockerfile
+      tag-prefix: "v" 
+
+  # 배포
+  deploying:
+    needs: releasing
+    uses: ./.github/workflows/deploy-workflow.yml
+    secrets:
+      DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
+
+    with:
+      service-name: tts-bot
+      # releasing 단계에서 만든 태그 사용
+      image-tag: ${{ needs.releasing.outputs.tag_name }}
