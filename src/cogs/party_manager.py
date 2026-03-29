@@ -3,7 +3,7 @@ from discord import app_commands
 from discord.ext import commands
 from datetime import datetime, timedelta
 
-from src import toast
+from src import toast, get_logger
 from src.ui import PartyView
 from src.model.dto import PartyInfoDTO
 from src.model.vo import Meridiem
@@ -12,6 +12,7 @@ class PartyManager(commands.Cog):
     
     def __init__(self, bot):
         self.bot = bot
+        self.logger = get_logger(__name__)
         
     @app_commands.command(name="파티모집", description="함께 모험을 떠날 파티원을 찾아보세요")
     @app_commands.choices(meridiem=[
@@ -33,21 +34,24 @@ class PartyManager(commands.Cog):
         calc_hour = hour
         
         # 오후인데 12시가 아니면 +12시간 (예: 오후 1시 -> 13시)
-        if meridiem == "PM" and hour != 12:
+        if meridiem == Meridiem.PM and hour != 12:
             calc_hour += 12
         # 오전 12시는 밤 00시로 처리
-        elif meridiem == "AM" and hour == 12:
+        elif meridiem == Meridiem.AM and hour == 12:
             calc_hour = 0
             
         target_time = now.replace(hour=calc_hour, minute=minute, second=0, microsecond=0)
-        
+
         # 시간이 이미 지났다면 '내일'로 인식
         if target_time < now:
             target_time += timedelta(days=1)
-            
+        
+        
         unix_time = int(target_time.timestamp())
         time:str = f"<t:{unix_time}:R>"
-            
+        
+        self.logger.info(f"{time}")
+        
         view = PartyView(
             interaction,
             PartyInfoDTO(
