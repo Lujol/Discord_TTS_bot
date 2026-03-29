@@ -4,6 +4,8 @@ services:
     container_name: tts-bot
     env_file:
       - .env
+    environment:
+      - TZ=Asia/Seoul
     volumes:
       - ./google_key.json:/app/google_key.json:ro
       - ./data:/app/data
