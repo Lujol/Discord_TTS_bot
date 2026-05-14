@@ -5,7 +5,7 @@ import os
 import datetime
         
 from .db_interface import ChannelRepository, SettingRepository, VoiceRepository, RecordingRepository, InfoRepository
-from src.model.dto import UserSettingsDTO, VoiceInfoDTO, PageResponse,PageRequest, UserRecordingDTO, SaveCustomVoiceDTO
+from src.model.dto import UserSettingsDTO, VoiceInfoDTO, PageResponse,PageRequest, UserRecordingDTO, SaveCustomVoiceDTO,  UserSettingsReq, UserSpeedReq
 from src.model.vo import VoiceGender, VoiceLanguage, VoiceType
 from src import apply_filter_and_sort, paging, get_logger
 
@@ -99,17 +99,21 @@ class JsonSettingRepository(SettingRepository):
             return UserSettingsDTO(**data)
         # 2.1 기본 세팅이 없을 시 
         except KeyError:
-            default :UserSettingsDTO = UserSettingsDTO(language = VoiceLanguage.KO, 
+            default : UserSettingsReq =  UserSettingsReq(language = VoiceLanguage.KO, 
                                                         gender= VoiceGender.NEUTRAL, 
                                                         voice= None,
                                                         type= VoiceType.DEFAULT) 
             
             await self.add_user_settings(server_id, user_id, default )
             
-            return default
+            return UserSettingsDTO(language = VoiceLanguage.KO, 
+                                gender= VoiceGender.NEUTRAL, 
+                                voice= None,
+                                type= VoiceType.DEFAULT,
+                                speed= 1.0) 
     
     
-    async def add_user_settings(self, server_id :int, user_id :int, data :UserSettingsDTO) -> None:
+    async def add_user_settings(self, server_id :int, user_id :int, data : UserSettingsReq) -> None:
         # 1. str 로 캐스팅    
         server_id_str = str(server_id)
         user_id_str = str(user_id)
@@ -126,6 +130,23 @@ class JsonSettingRepository(SettingRepository):
             with open(self.settings_path, "w", encoding="utf-8") as f:
                 json.dump(self.user_settings, f, indent=2, ensure_ascii=False)
                 
+    async def add_user_play_speed(self,  server_id :int, user_id :int, data : UserSpeedReq) -> None:
+         # 1. str 로 캐스팅    
+        server_id_str = str(server_id)
+        user_id_str = str(user_id)
+        
+        # dto -> dict
+        data_dict = data.model_dump(exclude_none=True)
+        
+        # 2. 락 
+        async with self.settings_lock:
+            
+            # 3. server id 및 user id 가 없을 시 생성 후 업데이트
+            self.user_settings.setdefault(server_id_str, {}).setdefault(user_id_str, {}).update(data_dict)
+                
+            with open(self.settings_path, "w", encoding="utf-8") as f:
+                json.dump(self.user_settings, f, indent=2, ensure_ascii=False)       
+        
 
 class JsonVoiceRepository(VoiceRepository):
     

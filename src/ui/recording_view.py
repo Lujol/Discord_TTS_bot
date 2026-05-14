@@ -3,7 +3,7 @@ from src.ui.page_view_interface import PaginationView
 from src.model.dto import UserRecordingDTO, PageResponse
 from src.model.vo import Playing_State 
 from src.ui.page_button import NextPageButton, PrevPageButton, PageInfo
-from src import stop, resume , pause
+from src.core import audio_manager
 
 class RecordingView(PaginationView):
     def __init__(self,recording_list :PageResponse , get_data, selected):
@@ -99,7 +99,10 @@ class RecordingSelect(discord.ui.Select):
 
 class MediaControlButton(discord.ui.Button ):
     def __init__(self, state :Playing_State):
+        
         self.state = state
+        self.audio_manager = audio_manager
+        
         if state == Playing_State.STOP:
             super().__init__(style=discord.ButtonStyle.red, label = "⏹️")
         elif state == Playing_State.PAUSE:
@@ -122,15 +125,15 @@ class MediaControlButton(discord.ui.Button ):
         
         if self.state == Playing_State.STOP:
             # 정지 처리
-            await stop(interaction)
+            await self.audio_manager.stop(interaction)
             
         elif self.state == Playing_State.PAUSE:
             # 중지 처리
-            await pause(interaction)
+            await self.audio_manager.pause(interaction)
             
         else:
             # resume 처리
-            await resume(interaction)
+            await self.audio_manager.resume(interaction)
             
         await view.setup_playing_ui(interaction)
 

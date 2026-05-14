@@ -1,5 +1,5 @@
 from abc import ABC, abstractmethod
-from src.model.dto import UserSettingsDTO, VoiceInfoDTO, PageRequest, PageResponse, SaveCustomVoiceDTO
+from src.model.dto import UserSettingsDTO, VoiceInfoDTO, PageRequest, PageResponse, SaveCustomVoiceDTO,  UserSettingsReq, UserSpeedReq
 
 class ChannelRepository(ABC):
     
@@ -27,9 +27,15 @@ class SettingRepository(ABC):
         pass
     
     @abstractmethod
-    async def add_user_settings(self, server_id :int, user_id :int, data :UserSettingsDTO) -> None:
+    async def add_user_settings(self, server_id :int, user_id :int, data : UserSettingsReq) -> None:
         """ 해당 유저의 설정을 추가/변경 합니다."""
         pass
+    
+    @abstractmethod
+    async def add_user_play_speed(self, server_id :int, user_id :int, data : UserSpeedReq) -> None:
+        """ 해당 유저의 설정을 추가/변경 합니다."""
+        pass
+    
     
 class VoiceRepository(ABC):
 
