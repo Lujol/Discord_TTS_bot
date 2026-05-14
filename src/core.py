@@ -2,6 +2,7 @@ from src.repository import *
 from src.tts_gen_engine import TTSManager
 from .config import settings
 from src.tts_train import ElevenlabsIVCManager
+from src.audio_player.audio_manager import AudioManager
 
 setting_repository : SettingRepository = JsonSettingRepository(
     settings_path= settings.SETTINGS_PATH)
@@ -29,3 +30,4 @@ tts_manager = TTSManager(
 
 elevenlabs_ivc_manager = ElevenlabsIVCManager()
 
+audio_manager = AudioManager()

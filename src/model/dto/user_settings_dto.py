@@ -7,4 +7,10 @@ class UserSettingsDTO(BaseModel):
     gender :Optional[VoiceGender] = VoiceGender.NEUTRAL
     voice :Optional[str] =None
     type :Optional[VoiceType] = VoiceType.DEFAULT
-    
+    speed : Optional[float] = 1.0
+
+class UserSettingsReq(BaseModel):
+    language :Optional[VoiceLanguage] = VoiceLanguage.KO
+    gender :Optional[VoiceGender] = VoiceGender.NEUTRAL
+    voice :Optional[str] =None
+    type :Optional[VoiceType] = VoiceType.DEFAULT

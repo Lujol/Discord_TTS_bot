@@ -7,11 +7,11 @@ import wave
 from pathlib import Path
 from typing import cast, Optional
 
-from src import toast, settings, ready_and_playing
+from src import toast, settings
 from src.record import MultiTrackWavSink
 from src.ui import RecordView ,RecordingView
 from src.model.dto import PageRequest, PageResponse
-from src.core import recording_repository
+from src.core import recording_repository, audio_manager
 from src import get_logger
 
 class RecordManager(commands.Cog):
@@ -22,6 +22,7 @@ class RecordManager(commands.Cog):
         self.sinks : dict[int, MultiTrackWavSink] = {}
         
         self.recording_repository =recording_repository
+        self.audio_manager = audio_manager
         
         self.logger = get_logger(__name__)
     @app_commands.command(name="녹음",description="tts 학습 용 녹음")
@@ -162,7 +163,7 @@ class RecordManager(commands.Cog):
         # 재생 할 녹음 파일
         data_path = str(settings.RECORD_DIR/selected_recording)
         
-        await ready_and_playing(ctx= interaction ,audio=data_path )
+        await self.audio_manager.ready_and_playing(ctx= interaction ,audio=data_path, default_speed= 1.0 )
         
         
     

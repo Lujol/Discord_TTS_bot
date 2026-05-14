@@ -4,8 +4,8 @@ from typing import cast, Optional
 from discord import app_commands
 from discord.ext import commands
 import re
-from src.common import toast, ready_and_playing
-from src.core import channel_repository,setting_repository,tts_manager
+from src.common import toast
+from src.core import channel_repository,setting_repository,tts_manager, audio_manager
 
 from src.model.dto import UserSettingsDTO
 
@@ -15,8 +15,13 @@ class MessageManager(commands.Cog):
         self.channel_repository = channel_repository
         self.setting_repository = setting_repository
         self.tts_manager = tts_manager
+        self.audio_manager = audio_manager
         
         self.url_pattern = r'https?://\S+|www\.\S+'
+        # 몇 글자마다 글자의 속도를 늘릴것인지?
+        self.char_step = 10
+        # 속도 늘어나는 정도?
+        self.speed_increment = 0.1
     
     @commands.Cog.listener()
     async def on_message(self, message: discord.Message):
@@ -41,14 +46,14 @@ class MessageManager(commands.Cog):
         
         
         # 5. 재생 할 음성 생성  
-        audio_binary =await self.get_audio(message)
+        audio_binary, default_speed = await self.get_audio(message)
         
         
         # 6. 봇 상태 확인, 이동, 재생
-        await ready_and_playing(ctx= message, audio=audio_binary)
+        await self.audio_manager.ready_and_playing(ctx= message, audio=audio_binary, default_speed= default_speed)
 
 
-    async def get_audio(self, message: discord.Message) -> bytes:
+    async def get_audio(self, message: discord.Message) -> tuple[bytes, float]:
         if message.guild is None:
             raise Exception("[Error] message.guild가 존재하지 않습니다.")
     
@@ -63,7 +68,16 @@ class MessageManager(commands.Cog):
         # 오디오 생성 
         audio_binary = await self.tts_manager.generate_audio(user_settings , server_id, message_content)
 
-        return audio_binary
+        default_speed : float = user_settings.speed or 1
+
+        # 글자 수에 따른 단계
+        step :int = max(0, len(message_content) - self.char_step) // self.char_step
+        # 글자 수에 따른 속도
+        length_speed :float = default_speed + (step) * self.speed_increment 
+        # 최종 (최대 2.0 제한)
+        final_speed: float = min(2.0,length_speed )
+    
+        return audio_binary, final_speed
 
 async def setup(bot):
     await bot.add_cog(MessageManager(bot))

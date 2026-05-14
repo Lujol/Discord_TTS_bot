@@ -1,7 +1,7 @@
 import discord
 
 from typing import Any
-from src.model.dto import PageRequest, PageResponse, VoiceInfoDTO ,UserSettingsDTO
+from src.model.dto import PageRequest, PageResponse, VoiceInfoDTO ,UserSettingsReq
 from src.model.vo import VoiceType,  VoiceGender, VoiceLanguage
 from src.ui.enum_select import EnumSelect
 from src.ui.page_view_interface import PaginationView
@@ -54,17 +54,17 @@ class VoiceSettingView(PaginationView):
         
     async def selected_voice(self, voice_id:str, interaction: discord.Interaction):
    
-        await self.save_data(interaction, UserSettingsDTO(voice= voice_id, type= self.voice_type ))
+        await self.save_data(interaction, UserSettingsReq(voice= voice_id, type= self.voice_type ))
         
         
     async def selected_region(self, selected_region:list , interaction: discord.Interaction):
         
-        await self.save_data(interaction, UserSettingsDTO(language=selected_region[0], type= self.voice_type ))
+        await self.save_data(interaction, UserSettingsReq(language=selected_region[0], type= self.voice_type ))
         
         
     async def selected_gender(self, selected_gender:list , interaction: discord.Interaction):
         
-        await self.save_data(interaction, UserSettingsDTO(gender=selected_gender[0], type= self.voice_type ))
+        await self.save_data(interaction, UserSettingsReq(gender=selected_gender[0], type= self.voice_type ))
         
     # 상위 메서드 구현 
     async def build_page(self , interaction :discord.Interaction):
