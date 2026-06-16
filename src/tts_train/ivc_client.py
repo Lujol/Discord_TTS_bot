@@ -3,6 +3,7 @@ import asyncio
 from elevenlabs.client import AsyncElevenLabs
 import io
 from pydub import AudioSegment
+import json
 
 from src import settings, get_logger
 
@@ -63,9 +64,7 @@ class ElevenlabsIVCManager:
                 name=voice_name,
                 description=description,
                 files=files_to_upload,
-                labels={
-                    "language": "ko"
-                }
+                labels=json.dumps({"language": "ko"})
             )
         
 
