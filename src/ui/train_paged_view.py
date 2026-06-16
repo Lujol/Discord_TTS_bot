@@ -46,6 +46,8 @@ class RecordingSelect(discord.ui.Select):
         
         options = [recording.to_select_option() for recording in recording_list]
         
+        
+        
         if not options:
             options = [discord.SelectOption(label="녹음 된 목록이 존재하지 않습니다", value= "None")]
             disabled = True
@@ -58,7 +60,7 @@ class RecordingSelect(discord.ui.Select):
             placeholder= "3분 이내가 되도록 녹음본을 골라주세요. (최대 5개)",
             options= options,
             min_values= 1,
-            max_values= 5,
+            max_values= min(5, len(options)),
             disabled= disabled)
         
         
