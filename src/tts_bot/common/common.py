@@ -3,7 +3,7 @@ import asyncio
 import math
 import io
 from typing import TypeVar, Optional, Any
-from src.model.dto import PageRequest, PageResponse
+from tts_bot.database.model.schemas import PageRequest, PageResponse
 
 async def toast(messege: str,interaction: discord.Interaction):
     
