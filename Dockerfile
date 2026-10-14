@@ -20,4 +20,4 @@ RUN poetry install --only main --no-root
 # 소스코드 가져오기
 COPY . .
 
-CMD ["python", "-m","src"]
+CMD ["python", "-m","src/tts_bot"]
