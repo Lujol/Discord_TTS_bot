@@ -1,8 +1,8 @@
-from src.repository import *
-from src.tts_gen_engine import TTSManager
-from .config import settings
-from src.tts_train import ElevenlabsIVCManager
-from src.audio_player.audio_manager import AudioManager
+from tts_bot.database.repository import *
+from tts_bot.services.tts_gen_engine import TTSManager
+from ..common.config import settings
+from tts_bot.services.tts_train import ElevenlabsIVCManager
+from tts_bot.services.audio_player.audio_manager import AudioManager
 
 setting_repository : SettingRepository = JsonSettingRepository(
     settings_path= settings.SETTINGS_PATH)

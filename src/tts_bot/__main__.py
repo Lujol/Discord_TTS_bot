@@ -3,7 +3,7 @@ import os
 from discord.ext import commands
 from .config import settings
 
-from src import setting_logs, get_logger
+from tts_bot import setting_logs, get_logger
 
 class Bot(commands.Bot):
     def __init__(self):
@@ -50,9 +50,9 @@ class Bot(commands.Bot):
         await self.change_presence(activity=discord.Game(name="TTS 봇"))
 
     async def load_extensions(self):
-        for filename in os.listdir('src/cogs'):
+        for filename in os.listdir('tts_bot/cogs'):
             if filename.endswith('.py'):
-                extension = 'src.cogs.' + filename[:-3]
+                extension = 'tts_bot.cogs.' + filename[:-3]
                 self.logger.info(f"{extension} 모듈을 불러왔습니다.")
                 await self.load_extension(extension)
             
